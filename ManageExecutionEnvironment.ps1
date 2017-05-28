@@ -13,23 +13,36 @@
 #
 
 class ManageExecutionEnvironment {
-  [string] $original_policy
+  [string] $OriginalPolicy
 
   [void] SetPolicy() {
-    Write-Output 'Ensuring permissions are set properly ...'
-    $this.original_policy = (Get-ExecutionPolicy)
-    if ($this.original_policy -ne 'Unrestricted') {
-      Write-Output 'Set ExecutionPolicy to Unrestricted'
+    # Sets Execution policies required for tweek to work.
+    #
+    Write-Host 'Ensuring permissions are set properly ...'
+    $this.OriginalPolicy = (Get-ExecutionPolicy)
+    if ($this.OriginalPolicy -ne 'Unrestricted') {
+      Write-Host 'Set ExecutionPolicy to Unrestricted'
       Set-ExecutionPolicy 'Unrestricted' -Force
     }
   }
 
   [void] RestorePolicy() {
-    Write-Output 'Restoring ExectionPolicy to: ' + $this.original_policy
-    Set-ExecutionPolicy $this.original_policy -Force
+    # Restores previous system policy when exiting tweek.
+    #
+    Write-Host ("`nRestoring ExectionPolicy to: " + $this.OriginalPolicy)
+    Set-ExecutionPolicy $this.OriginalPolicy -Force
   }
 
-  [void] UnblockModules() {
-    Get-ChildItem -Recurse -Filter *.psm1 | Unblock-File -Verbose
+  [void] UnblockModules($VerbosePreference) {
+    # Unblock modules for tweek to import.
+    #
+    # Args:
+    #   VerbosePreference: Object containing verbosity option.
+    #
+    if ($VerbosePreference -ne 'Continue') {
+      Get-ChildItem -Recurse -Filter *.psm1 | Unblock-File
+    } else {
+      Get-ChildItem -Recurse -Filter *.psm1 | Unblock-File -Verbose
+    }
   }
 }

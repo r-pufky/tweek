@@ -78,6 +78,7 @@
     are accepted as long as they are not malicious and follow guidelines.   
 #>
 
+[cmdletbinding()] 
 param(
   [switch]$Unsigned,
   [string]$Catagory = 'all',
@@ -88,32 +89,40 @@ param(
 )
 
 . .\ManageExecutionEnvironment.ps1
-$environment_manager = [ManageExecutionEnvironment]::New()
-$environment_manager.SetPolicy()
-$environment_manager.UnblockModules()
+$EnvironmentManager = [ManageExecutionEnvironment]::New()
+try {
+  $EnvironmentManager.SetPolicy()
+  $EnvironmentManager.UnblockModules($VerbosePreference)
 
-# Always force re-import in case modules were updated in place.
-Import-Module .\FileManager.psm1 -Force
-$file_manager = NewFileManager
-if (!($Unsigned)) {
-  $file_manager.ValidateAndUpdate()
-}
-$modules = $file_manager.ModuleLoader()
-
-if ($List) {
-  foreach ($module in $modules.GetEnumerator()) {
-    Write-Output ($module.Value.TweakInfo())
+  # Always force re-import in case modules were updated in place.
+  Import-Module .\FileManager.psm1 -Force
+  $FileManager = NewFileManager
+  if (!($Unsigned)) {
+    $FileManager.ValidateAndUpdate($VerbosePreference)
   }
-  exit
-}
+  $Modules = $FileManager.ModuleLoader()
 
-if ($Tweak) {
-  $modules[$Tweak].ApplyTweak()
-  exit
-}
+  if ($List) {
+    foreach ($Module in $Modules.GetEnumerator()) {
+      Write-Output ($Module.Value.TweakInfo())
+    }
+    exit
+  }
 
-foreach ($module in $modules.GetEnumerator()) {
-  Write-Output ($module.Name + ' ' + $module.Value.Validate())
-}
+  if ($Tweak) {
+    $Modules[$Tweak].ApplyTweak()
+    exit
+  }
 
-$environment_manager.RestorePolicy()
+  if ($Catagory) {
+    Write-Output ('Applying ' + $Catagory + ' tweaks ...')
+    foreach ($Module in $Modules.GetEnumerator()) {
+      if ($Module.Value.catagory -eq $Catagory) {
+        $Module.Value.ApplyTweak()
+      }
+    }
+    exit
+  }
+} finally {
+  $EnvironmentManager.RestorePolicy()
+}

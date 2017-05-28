@@ -3,7 +3,7 @@
 using module '..\TweekModule.psm1'
 
 class AnotherTweek : TweekModule {
-  [WindowsEdition] $edition = [WindowsEdition]::home
+  [WindowsEdition] $Edition = [WindowsEdition]::home
 }
 
 function Load() {

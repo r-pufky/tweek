@@ -10,45 +10,48 @@ class FileManager {
   [string] $URI_BASE = 'https://raw.githubusercontent.com/r-pufky/tweek/master'
   [string] $INTEGRITY_HASHES = 'integrity-hashes.sha256'
 
-  [boolean] VerifyFile($valid_hash, $target) {
+  [boolean] VerifyFile($ValidHash, $Target) {
     # Verifies file integrity by comparing file's current hash to verified hash.
     #
     # Args:
-    #   target_hash: String known hash to compare with file hash.
-    #   target: Item object containing FullName path to file to verify.
+    #   ValidHash: String known hash to compare with file hash.
+    #   Target: Item object containing FullName path to file to verify.
     #
-    $hash = Get-FileHash $target -Algorithm 'SHA256'
-    if ($valid_hash -eq $hash.hash) {
+    $Hash = Get-FileHash $Target -Algorithm 'SHA256'
+    if ($ValidHash -eq $Hash.hash) {
       return $true
     }
     return $false
   }
 
-  [void] UpdateFile($file) {
+  [void] UpdateFile($File) {
     # Updates a given file in place, using current working directory
     #
     # Args:
-    #   file: Item object containing the location of file to write locally.
+    #   File: Item object containing the location of file to write locally.
     #
     # Returns:
     #   Boolean True if successful, False otherwise.
     #
-    $uri = $this.URI_BASE + $this.ConvertUri($file)
-    Write-Host ('Updating: ' + $file.FullName + ' (' + $uri + ')')
-    $client = New-Object System.Net.WebClient
-    $client.DownloadFile($uri, $file)
+    $Uri = $this.URI_BASE + $this.ConvertUri($File)
+    Write-Host ('Updating: ' + $File.FullName + ' (' + $Uri + ')')
+    $Client = New-Object System.Net.WebClient
+    $Client.DownloadFile($Uri, $File)
   }
 
-  [string] ConvertUri($file) {
+  [string] ConvertUri($File) {
     # Convert a given Item object to a relative URI path.
     #
     # Assumes that file is within the 'tweek' directory. Converts the relative
     # path after 'tweek' into URI (NOT-ESCAPED) string.
     #
+    # Args:
+    #   File: Item object containing the location of file to write locally.
+    # 
     # Returns:
     #   String containing the relative URI for the file resource.
     #
-    return $file.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.replace('\','/')}
+    return $File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.replace('\','/')}
   }
 
   [hashtable] GetIntegrityHashes() {
@@ -59,19 +62,19 @@ class FileManager {
     # Returns
     #   Hashtable containing {[string] relative file location: [string] hash}
     #
-    $hashes = @{}
+    $Hashes = @{}
     if (!(Test-Path $this.INTEGRITY_HASHES)) {
       New-Item $this.INTEGRITY_HASHES -Type file -Force
     }
     $this.UpdateFile((Get-Item $this.INTEGRITY_HASHES))
-    foreach ($line in Get-Content $this.INTEGRITY_HASHES) {
-      $verified_hash, $file_location = $line.split(' *', [System.StringSplitOptions]::RemoveEmptyEntries)
-      $hashes.Add($file_location, $verified_hash)
+    foreach ($Line in Get-Content $this.INTEGRITY_HASHES) {
+      $VerifiedHash, $FileLocation = $Line.split(' *', [System.StringSplitOptions]::RemoveEmptyEntries)
+      $Hashes.Add($FileLocation, $VerifiedHash)
     }
-    return $hashes
+    return $Hashes
   }
 
-  [void] ValidateAndUpdate() {
+  [void] ValidateAndUpdate($VerbosePreference) {
     # Validates and updates all files related to tweek.
     #
     # A validation hashfile is downloaded and a current file list is generated
@@ -81,33 +84,37 @@ class FileManager {
     # remaining hashes in the hashfile are used to download the missing files
     # and revalidate them.
     #
+    #
+    # Args:
+    #   VerbosePreference: Object containing verbosity option.
+    #
     # Raises:
     #   System.IO.FileLoadException for validation error.
     #
-    $hashes = $this.GetIntegrityHashes()
-    foreach ($file in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
-      $file_key = ($file.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)} | Select-Object -Last 1)
-      Write-Debug ('Validating from filesystem: ' + $file_key)
-      if ($this.VerifyFile($hashes[$file_key], $file.FullName)) {
-        $hashes.Remove($file_key)
+    $Hashes = $this.GetIntegrityHashes()
+    foreach ($File in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
+      $FileKey = ($File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)} | Select-Object -Last 1)
+      Write-Verbose ('Validating from filesystem: ' + $FileKey)
+      if ($this.VerifyFile($Hashes[$FileKey], $File.FullName)) {
+        $Hashes.Remove($FileKey)
         continue
       }
-      $this.UpdateFile($file)
-      if ($this.VerifyFile($hashes[$file_key], $file.FullName)) {
-        $hashes.Remove($file_key)
+      $this.UpdateFile($File)
+      if ($this.VerifyFile($Hashes[$FileKey], $File.FullName)) {
+        $Hashes.Remove($FileKey)
         continue
       } else {
-        throw [System.IO.FileLoadException]::new($file.FullName + ' failed to validate.')
+        throw [System.IO.FileLoadException]::new($File.FullName + ' failed to validate.')
       }
     }
 
-    if ($hashes.Count -ne 0) {
-      foreach ($hash in $hashes.GetEnumerator()) {
-        Write-Debug ('Validating from hashtable: ' + $hash.Name)
-        $file = New-Item $hash.Name -Type file -Force
-        $this.UpdateFile($file)
-        if (!($this.VerifyFile($hash.Value, $file.FullName))) {
-          throw [System.IO.FileLoadException]::new($file.FullName + ' failed to validate [hashlist].')
+    if ($Hashes.Count -ne 0) {
+      foreach ($Hash in $Hashes.GetEnumerator()) {
+        Write-Verbose ('Validating from hashtable: ' + $Hash.Name)
+        $File = New-Item $Hash.Name -Type file -Force
+        $this.UpdateFile($File)
+        if (!($this.VerifyFile($Hash.Value, $File.FullName))) {
+          throw [System.IO.FileLoadException]::new($File.FullName + ' failed to validate [hashlist].')
         }
       }      
     }
@@ -120,15 +127,15 @@ class FileManager {
     #   Hashtable containing loaded TweekModule class objects
     #   {[string] ClassName: [TweakModule] tweek object}
     #
-    $modules = @{}
-    foreach ($file in Get-ChildItem '.\modules\' -Filter '*.psm1') {
-      Import-Module $file.FullName -Force
-      $class_name = ((Get-Module $file.BaseName).ImplementingAssembly.DefinedTypes | where IsPublic).Name
-      $class_loader = (get-command 'Load' -CommandType Function -Module $class_name).ScriptBlock
-      $temp = invoke-command -scriptblock $class_loader
-      $modules.Add($temp.Name(), $temp)
+    $Modules = @{}
+    foreach ($File in Get-ChildItem '.\modules\' -Filter '*.psm1') {
+      Import-Module $File.FullName -Force
+      $ClassName = ((Get-Module $File.BaseName).ImplementingAssembly.DefinedTypes | where IsPublic).Name
+      $ClassLoader = (get-command 'Load' -CommandType Function -Module $ClassName).ScriptBlock
+      $Temp = invoke-command -scriptblock $ClassLoader
+      $Modules.Add($Temp.Name(), $Temp)
     }
-    return $modules
+    return $Modules
   }
 }
 

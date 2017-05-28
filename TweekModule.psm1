@@ -55,34 +55,34 @@ class TweekModule {
   # Base module for specifying a tweak to apply to Windows 10.
   #
   # Properties:
-  #   policy_references: Array of Strings containing links to reference
+  #   PolicyReferences: Array of Strings containing links to reference
   #       material for specific tweak. One reference required.
-  #   description: String short description of tweak.
-  #   edition: WindowsEdition enum specifying the lowest Windows edition this
+  #   Description: String short description of tweak.
+  #   Edition: WindowsEdition enum specifying the lowest Windows edition this
   #       tweak applies to. Default: home.
-  #   version: WindowsVersion enum specifying the lowest Windows version this
+  #   Version: WindowsVersion enum specifying the lowest Windows version this
   #       tweak applies to. Default: verison_1507.
-  #   classification: TweakClassification enum specifying the general state
+  #   Classification: TweakClassification enum specifying the general state
   #       of the module. Default: stable.
-  #   catagory: TweakCatagory enum specifying the type of tweak of the module.
+  #   Catagory: TweakCatagory enum specifying the type of tweak of the module.
   #       Default: telemetry.
   #
-  [string[]] $policy_references
-  [string] $description
-  [WindowsEdition] $edition = [WindowsEdition]::home
-  [WindowsVersion] $version = [WindowsVersion]::version_1507
-  [TweakClassification] $classification = [TweakClassification]::stable
-  [TweakCatagory] $catagory = [TweakCatagory]::telemetry
+  [string[]] $PolicyReferences
+  [string] $Description
+  [WindowsEdition] $Edition = [WindowsEdition]::home
+  [WindowsVersion] $Version = [WindowsVersion]::version_1507
+  [TweakClassification] $Classification = [TweakClassification]::stable
+  [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
 
   [boolean] Validate() {
     # Validates minimum requirements for tweak to be executed.
     #
     # Returns:
     #   Boolean True if the tweak is valid, False otherwise.
-    if ($this.policy_references -eq $null) {
+    if ($this.PolicyReferences -eq $null) {
       return $false
     }
-    if ($this.descripttion -eq $null) {
+    if ($this.Description -eq $null) {
       return $false
     }
     return $true
@@ -109,7 +109,7 @@ class TweekModule {
     #
     # Returns:
     #   Boolean True if the tweak applied successfully, False otherwise.
-    Write-Host ('Applying ' + $this.Name())
+    Write-Host ('  Applying ' + $this.Name())
     if ($this.GroupPolicyTweak() -And $this.RegistryTweak()) {
       return $true
     }
@@ -126,13 +126,13 @@ class TweekModule {
     return (
       "`n{0}`n{1}: {2}`nReferences:`n  {3}`nEdition: {4}`nMinimum Version: {5}`nClassification: {6}`nCatagory: {7}`nValid Module: {8}" -f
       ('-' * 35),
-      $this.name(),
-      $this.description,
-      ($this.policy_references -join "`n  "),
-      $this.edition,
-      $this.version,
-      $this.classification,
-      $this.catagory,
+      $this.Name(),
+      $this.Description,
+      ($this.PolicyReferences -join "`n  "),
+      $this.Edition,
+      $this.Version,
+      $this.Classification,
+      $this.Catagory,
       $this.Validate())
   }
 }
