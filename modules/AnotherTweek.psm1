@@ -1,8 +1,8 @@
 ﻿# test module import and inheritence
 
-using module '..\base\tweak.psm1'
+using module '..\TweekModule.psm1'
 
-class AnotherTweek : TweakModule {
+class AnotherTweek : TweekModule {
   [WindowsEdition] $edition = [WindowsEdition]::home
 }
 

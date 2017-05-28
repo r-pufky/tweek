@@ -23,9 +23,10 @@
     running.
 .PARAMETER Unsigned
     Specify to execute modules that do not pass verification hashes.
-    **DANGEROUS**. By default, all modules must be verified against known good
-    modules from the public repository before they are used. Useful for testing
-    new modules.
+    **DANGEROUS**. By default, all modules and system files must be verified
+    against known good modules from the public repository before they are used.
+
+    You shouldn't use this unless you are testing new code or modules.
 .PARAMETER Catagory
     What type of tweaks to run. Default: 'all'.
     Values:   firewall, services, filesystem, telemetry, system, all
@@ -69,18 +70,18 @@ param(
 )
 
 . .\ManageExecutionEnvironment.ps1
-Import-Module .\base\validator.psm1
-Import-Module .\base\update.psm1
-Import-Module .\base\tweak.psm1
-Import-Module .\base\hash.psm1
-
-
-Write-Output 'Ensuring permissions are set properly ...'
 $environment_manager = [ManageExecutionEnvironment]::New()
 $environment_manager.SetPolicy()
 $environment_manager.UnblockModules()
 
-if (!$Unsigned) {
-  
+# Modules are always force re-imported in case they were updated in place.
+Import-Module .\FileManager.psm1 -Force
+
+$file_manager = NewFileManager
+$file_manager.ValidateAndUpdate()
+
+#Import-Module .\base\update.psm1
+#Import-Module .\base\tweak.psm1
+#Import-Module .\base\hash.psm1
 
 $environment_manager.RestorePolicy()

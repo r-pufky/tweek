@@ -5,13 +5,18 @@
 # not signed by a CA and trusted from your cert store. This tool runs with the
 # ExecutionPolicy set to 'Unrestricted'.
 #
+# This is not setup as a module so it can be used with needing to Unblock it
+# first.
+#
 # See setting Execution Policy:
 #   - https://technet.microsoft.com/en-us/library/ee176961.aspx
+#
 
 class ManageExecutionEnvironment {
   [string] $original_policy
 
   [void] SetPolicy() {
+    Write-Output 'Ensuring permissions are set properly ...'
     $this.original_policy = (Get-ExecutionPolicy)
     if ($this.original_policy -ne 'Unrestricted') {
       Write-Output 'Set ExecutionPolicy to Unrestricted'

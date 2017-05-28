@@ -1,4 +1,4 @@
-﻿# Base TweakModule class for processing Windows 10 configuration tweaks
+﻿# Base TweekModule class for processing Windows 10 configuration tweaks
 
 # Windows 10 editions
 # based on https://en.wikipedia.org/wiki/Windows_10_editions#Baseline_editions 
@@ -37,7 +37,7 @@ enum TweakCatagory {
   system
 }
 
-class TweakModule {
+class TweekModule {
   # Base module for specifying a tweak to apply to Windows 10.
   #
   # Properties:
