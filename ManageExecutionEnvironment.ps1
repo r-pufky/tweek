@@ -30,6 +30,6 @@ class ManageExecutionEnvironment {
   }
 
   [void] UnblockModules() {
-    Get-ChildItem -Recurse -Filter .\*.psm1 | Unblock-File -Verbose
+    Get-ChildItem -Recurse -Filter *.psm1 | Unblock-File -Verbose
   }
 }
