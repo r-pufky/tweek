@@ -1,7 +1,10 @@
 ﻿# Base TweekModule class for processing Windows 10 configuration tweaks
 
-# Windows 10 editions
-# based on https://en.wikipedia.org/wiki/Windows_10_editions#Baseline_editions 
+# Windows 10 editions based on:
+# https://en.wikipedia.org/wiki/Windows_10_editions#Baseline_editions
+#
+# These help categorize specific tweaks for specific operating systems
+# e.g. can only be applied to a specific OS.
 enum WindowsEdition {
   home
   pro
@@ -13,8 +16,11 @@ enum WindowsEdition {
   china_government_edition
 }
 
-# Windows 10 versions
-# based on https://en.wikipedia.org/wiki/Windows_10_version_history
+# Windows 10 versions based on:
+# https://en.wikipedia.org/wiki/Windows_10_version_history
+#
+# These are the current numeric 'patch' versions of windows 10. These
+# determine the minimal patch level a specific tweak applies to.
 enum WindowsVersion {
   version_1507 = 1507
   version_1511 = 1511
@@ -22,20 +28,27 @@ enum WindowsVersion {
   version_1703 = 1703
 }
 
-# Tweak classifications
+# Tweak classifications pertaining to each tweak.
 enum TweakClassification {
+  # stable tweaks are vetted and apply broadly.
   stable
+  # New tweaks are automatically classified as flakey. These are *not* run
+  # by default
   flakey
+  # Optional tweaks applied to tweaks to specific user hardware or software
+  # and should not be applied to a generic windows 10 install. These are
+  # *not* run by default.
   optional
 }
 
-# Tweak Catagories
+# Tweak Catagories. This helps sort tweaks into broad categories for filtering.
 enum TweakCatagory {
   firewall
   services
   filesystem
   telemetry
   system
+  hardware
 }
 
 class TweekModule {
@@ -96,6 +109,7 @@ class TweekModule {
     #
     # Returns:
     #   Boolean True if the tweak applied successfully, False otherwise.
+    Write-Host ('Applying ' + $this.Name())
     if ($this.GroupPolicyTweak() -And $this.RegistryTweak()) {
       return $true
     }
@@ -105,6 +119,21 @@ class TweekModule {
   [string] Name() {
     # Returns the string class name of the object.
     return $this.GetType().FullName
+  }
+
+  [string] TweakInfo() {
+    # Returns a string containing information for this tweek.
+    return (
+      "`n{0}`n{1}: {2}`nReferences:`n  {3}`nEdition: {4}`nMinimum Version: {5}`nClassification: {6}`nCatagory: {7}`nValid Module: {8}" -f
+      ('-' * 35),
+      $this.name(),
+      $this.description,
+      ($this.policy_references -join "`n  "),
+      $this.edition,
+      $this.version,
+      $this.classification,
+      $this.catagory,
+      $this.Validate())
   }
 }
 

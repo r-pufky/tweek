@@ -83,7 +83,8 @@ param(
   [string]$Catagory = 'all',
   [string]$Classification = 'stable',
   [switch]$DryRun,
-  [string]$Tweak = $none
+  [string]$Tweak = $none,
+  [switch]$List
 )
 
 . .\ManageExecutionEnvironment.ps1
@@ -98,6 +99,18 @@ if (!($Unsigned)) {
   $file_manager.ValidateAndUpdate()
 }
 $modules = $file_manager.ModuleLoader()
+
+if ($List) {
+  foreach ($module in $modules.GetEnumerator()) {
+    Write-Output ($module.Value.TweakInfo())
+  }
+  exit
+}
+
+if ($Tweak) {
+  $modules[$Tweak].ApplyTweak()
+  exit
+}
 
 foreach ($module in $modules.GetEnumerator()) {
   Write-Output ($module.Name + ' ' + $module.Value.Validate())
