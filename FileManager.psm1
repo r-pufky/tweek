@@ -16,8 +16,6 @@ class FileManager {
     # Args:
     #   target_hash: String known hash to compare with file hash.
     #   target: Item object containing FullName path to file to verify.
-    #   algorithm: String algorithm to use for comparision. From
-    #       Get-FileHash:Algorithm. Default: SHA256.
     #
     $hash = Get-FileHash $target -Algorithm 'SHA256'
     if ($valid_hash -eq $hash.hash) {
@@ -38,17 +36,18 @@ class FileManager {
     $uri = $this.URI_BASE + $this.ConvertUri($file)
     Write-Host ('Updating: ' + $file.FullName + ' (' + $uri + ')')
     $client = New-Object System.Net.WebClient
-    #$client.DownloadFile($uri, $file)
+    $client.DownloadFile($uri, $file)
   }
 
   [string] ConvertUri($file) {
     # Convert a given Item object to a relative URI path.
     #
     # Assumes that file is within the 'tweek' directory. Converts the relative
-    # path afte 'tweek' into URI (NOT-ESCAPED) string.
+    # path after 'tweek' into URI (NOT-ESCAPED) string.
     #
     # Returns:
     #   String containing the relative URI for the file resource.
+    #
     return $file.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.replace('\','/')}
   }
 
@@ -59,12 +58,12 @@ class FileManager {
     #
     # Returns
     #   Hashtable containing {[string] relative file location: [string] hash}
+    #
     $hashes = @{}
     if (!(Test-Path $this.INTEGRITY_HASHES)) {
       New-Item $this.INTEGRITY_HASHES -Type file -Force
     }
-    # TODO: don't update hashfile when testing.
-    #$this.UpdateFile((Get-Item $this.INTEGRITY_HASHES))
+    $this.UpdateFile((Get-Item $this.INTEGRITY_HASHES))
     foreach ($line in Get-Content $this.INTEGRITY_HASHES) {
       $verified_hash, $file_location = $line.split(' *', [System.StringSplitOptions]::RemoveEmptyEntries)
       $hashes.Add($file_location, $verified_hash)
@@ -85,8 +84,6 @@ class FileManager {
     # Raises:
     #   System.IO.FileLoadException for validation error.
     #
-    # TODO: If a file is missing but specified in hashlist, you need to create it
-    #   first before downloading it.
     $hashes = $this.GetIntegrityHashes()
     foreach ($file in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
       $file_key = ($file.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)})
@@ -112,6 +109,24 @@ class FileManager {
         }
       }      
     }
+  }
+
+  [hashtable] ModuleLoader() {
+    # Dynamically load all Tweek modules for use.
+    #
+    # Returns:
+    #   Hashtable containing loaded TweekModule class objects
+    #   {[string] ClassName: [TweakModule] tweek object}
+    #
+    $modules = @{}
+    foreach ($file in Get-ChildItem '.\modules\' -Filter '*.psm1') {
+      Import-Module $file.FullName -Force
+      $class_name = ((Get-Module $file.BaseName).ImplementingAssembly.DefinedTypes | where IsPublic).Name
+      $class_loader = (get-command 'Load' -CommandType Function -Module $class_name).ScriptBlock
+      $temp = invoke-command -scriptblock $class_loader
+      $modules.Add($temp.Name(), $temp)
+    }
+    return $modules
   }
 }
 

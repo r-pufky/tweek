@@ -26,6 +26,7 @@ enum WindowsVersion {
 enum TweakClassification {
   stable
   flakey
+  optional
 }
 
 # Tweak Catagories
