@@ -86,7 +86,8 @@ class FileManager {
     #
     $hashes = $this.GetIntegrityHashes()
     foreach ($file in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
-      $file_key = ($file.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)})
+      $file_key = ($file.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)} | Select-Object -Last 1)
+      Write-Debug ('Validating from filesystem: ' + $file_key)
       if ($this.VerifyFile($hashes[$file_key], $file.FullName)) {
         $hashes.Remove($file_key)
         continue
@@ -100,8 +101,9 @@ class FileManager {
       }
     }
 
-    if ($hashes.Count() -ne 0) {
+    if ($hashes.Count -ne 0) {
       foreach ($hash in $hashes.GetEnumerator()) {
+        Write-Debug ('Validating from hashtable: ' + $hash.Name)
         $file = New-Item $hash.Name -Type file -Force
         $this.UpdateFile($file)
         if (!($this.VerifyFile($hash.Value, $file.FullName))) {
