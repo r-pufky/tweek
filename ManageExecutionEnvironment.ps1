@@ -21,7 +21,7 @@ class ManageExecutionEnvironment {
     Write-Host 'Ensuring permissions are set properly ...'
     $this.OriginalPolicy = (Get-ExecutionPolicy)
     if ($this.OriginalPolicy -ne 'Unrestricted') {
-      Write-Host 'Set ExecutionPolicy to Unrestricted'
+      Write-Warning 'Set ExecutionPolicy to: Unrestricted'
       Set-ExecutionPolicy 'Unrestricted' -Force
     }
   }
@@ -29,7 +29,7 @@ class ManageExecutionEnvironment {
   [void] RestorePolicy() {
     # Restores previous system policy when exiting tweek.
     #
-    Write-Host ("`nRestoring ExectionPolicy to: " + $this.OriginalPolicy)
+    Write-Warning ("`n`nRestoring ExectionPolicy to: " + $this.OriginalPolicy)
     Set-ExecutionPolicy $this.OriginalPolicy -Force
   }
 

@@ -84,7 +84,6 @@ class FileManager {
     # remaining hashes in the hashfile are used to download the missing files
     # and revalidate them.
     #
-    #
     # Args:
     #   VerbosePreference: Object containing verbosity option.
     #
@@ -122,7 +121,7 @@ class FileManager {
 
   [hashtable] ModuleLoader() {
     # Dynamically load all Tweek modules for use.
-    #
+    # 
     # Returns:
     #   Hashtable containing loaded TweekModule class objects
     #   {[string] ClassName: [TweakModule] tweek object}
@@ -131,9 +130,8 @@ class FileManager {
     foreach ($File in Get-ChildItem '.\modules\' -Filter '*.psm1') {
       Import-Module $File.FullName -Force
       $ClassName = ((Get-Module $File.BaseName).ImplementingAssembly.DefinedTypes | where IsPublic).Name
-      $ClassLoader = (get-command 'Load' -CommandType Function -Module $ClassName).ScriptBlock
-      $Temp = invoke-command -scriptblock $ClassLoader
-      $Modules.Add($Temp.Name(), $Temp)
+      $ModuleObject = invoke-command -scriptblock (get-command 'Load' -CommandType Function -Module $ClassName).ScriptBlock
+      $Modules.Add($ModuleObject.Name(), $ModuleObject)
     }
     return $Modules
   }

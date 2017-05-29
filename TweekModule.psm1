@@ -136,9 +136,13 @@ class TweekModule {
     # Apply tweak to the system.
     #
     # This is the system method used to apply this tweak to the system.
+    # Automatically checks to see if GroupPolicy module is present to execute
+    # GPO tweaks.
     #
     Write-Host ('  Applying ' + $this.Name())
-    $this._GroupPolicyTweak()
+    if (Get-Module -ListAvailable -Name GroupPolicy) {
+      $this._GroupPolicyTweak()
+    }
     $this._RegistryTweak()
   }
 
