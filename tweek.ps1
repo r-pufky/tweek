@@ -45,7 +45,7 @@
     shouldn't be run by default for most users.
 
 .PARAMETER DryRun
-    Specify to dry run the script.
+    Simulate running modules instead of actually running them.
 
 .PARAMETER Tweak
     Run only a single Tweak module. This is specified via the Class/filename.
@@ -66,12 +66,28 @@
 .EXAMPLE
     C:\PS> .\tweak.ps1 -Catagory telemetry
     
-    Run all telemetry tweaks against the system.
+    Run all telemetry tweaks against the system. **NOTE** this will execute
+    'stable' modules only. Specify -Classification to run a specific type.
+
+.EXAMPLE
+    c:\PS> .\tweak.ps1 -Catagory telemetry -DryRun
+
+    Simulate running all telemetry tweaks against the system.
 
 .EXAMPLE
     C:\PS> .\tweak.ps1 -Unsigned -Tweak MyNewTweak
 
-    Run MyNewTweak module, do not verify file hash.
+    Run MyNewTweak module, do not verify file hashes.
+
+.EXAMPLE
+    C:\PS> .\tweak.ps1 -List -Catagory telemetry
+
+    Lists all modules dealing with telemetry.
+
+.EXAMPLE
+    C:PS> .\tweak.ps1 -List
+
+    Lista all modules for tweek.
 
 .NOTES
     Please add additional tweaks to github.com/r-pufky/tweaker. All new modules
@@ -104,24 +120,29 @@ try {
 
   if ($List) {
     foreach ($Module in $Modules.GetEnumerator()) {
-      Write-Output ($Module.Value.TweakInfo())
+      if ($Catagory -ne 'all') {
+        if ($Catagory -eq $Module.Value.Catagory) {
+          Write-Output ($Module.Value.TweakInfo())
+        }
+      } else {
+        Write-Output ($Module.Value.TweakInfo())
+      }
     }
     exit
   }
 
   if ($Tweak) {
-    $Modules[$Tweak].ApplyTweak()
+    if ($Modules.ContainsKey($Tweak)) {
+      $Modules[$Tweak].TweekExecute($DryRun, $Classification, $Catagory, $Tweak)
+    } else {
+      throw ($Tweak + ' is not a valid module; check valid modules using -List')
+    }
     exit
   }
 
-  if ($Catagory) {
-    Write-Output ('Applying ' + $Catagory + ' tweaks ...')
-    foreach ($Module in $Modules.GetEnumerator()) {
-      if ($Module.Value.catagory -eq $Catagory) {
-        $Module.Value.ApplyTweak()
-      }
-    }
-    exit
+  Write-Output ('Applying ' + $Catagory + ' tweaks ...')
+  foreach ($Module in $Modules.GetEnumerator()) {
+    $Module.Value.TweekExecute($DryRun, $Classification, $Catagory, $Tweak)
   }
 } finally {
   $EnvironmentManager.RestorePolicy()

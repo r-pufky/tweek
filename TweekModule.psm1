@@ -74,21 +74,7 @@ class TweekModule {
   [TweakClassification] $Classification = [TweakClassification]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
 
-  [boolean] Validate() {
-    # Validates minimum requirements for tweak to be executed.
-    #
-    # Returns:
-    #   Boolean True if the tweak is valid, False otherwise.
-    if ($this.PolicyReferences -eq $null) {
-      return $false
-    }
-    if ($this.Description -eq $null) {
-      return $false
-    }
-    return $true
-  }
-
-  [boolean] GroupPolicyTweak() {
+  [boolean] _GroupPolicyTweak() {
     # Apply tweak using Group policy objects.
     #
     # Returns:
@@ -96,7 +82,7 @@ class TweekModule {
     return $false
   }
 
-  [boolean] RegistryTweak() {
+  [boolean] _RegistryTweak() {
     # Apply tweak using registry editor.
     #
     # Returns:
@@ -104,16 +90,55 @@ class TweekModule {
     return $false
   }
 
-  [boolean] ApplyTweak() {
-    # Apply all tweaks to the system.
+  [boolean] _ApplyTweak() {
+    # Apply tweak to the system.
+    #
+    # This is the system method used to apply this tweak to the system.
     #
     # Returns:
     #   Boolean True if the tweak applied successfully, False otherwise.
     Write-Host ('  Applying ' + $this.Name())
-    if ($this.GroupPolicyTweak() -And $this.RegistryTweak()) {
+    if ($this._GroupPolicyTweak() -And $this._RegistryTweak()) {
       return $true
     }
     return $false
+  }
+
+  [void] _ExecuteOrDryRun($DryRun) {
+    # Executes tweak or logs a dry run.
+    #
+    # Args:
+    #   DryRun: Switch if DryRun option was selected on command line.
+    #
+    if (!($DryRun)) {
+      $this._ApplyTweak()
+    } else {
+      Write-Host ('Dry Run: ' + $this.Name())
+    }
+  }
+
+  [void] TweekExecute($DryRun, $Classification, $Catagory, $Tweak) {
+    # System calls this method to apply the Tweak to the system.
+    #
+    # This contains the logic to determine what action to execute.
+    # If you need to change how a tweak is applied, modify _ApplyTweak()
+    # in your subclass.
+    #
+    # Args:
+    #   DryRun: Switch if DryRun option was selected on the command line.
+    #   Classifcation: String classification specified on the command line.
+    #   Catagory: String catagory specified on the command line.
+    #   Tweak: String specific tweak to run on the command line.
+    #
+    if (($Tweak) -And ($Tweak -eq $this.Name())) {
+      $this._ExecuteOrDryRun($DryRun)
+    } else {
+      if (($Catagory -eq 'all') -Or ($Catagory -eq $this.Catagory)) {
+        if ($Classification -eq $this.Classification) {
+          $this._ExecuteOrDryRun($DryRun)
+        } 
+      }
+    }
   }
 
   [string] Name() {
@@ -134,6 +159,20 @@ class TweekModule {
       $this.Classification,
       $this.Catagory,
       $this.Validate())
+  }
+
+  [boolean] Validate() {
+    # Validates minimum requirements for tweak to be executed.
+    #
+    # Returns:
+    #   Boolean True if the tweak is valid, False otherwise.
+    if ($this.PolicyReferences -eq $null) {
+      return $false
+    }
+    if ($this.Description -eq $null) {
+      return $false
+    }
+    return $true
   }
 }
 
