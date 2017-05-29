@@ -119,6 +119,7 @@ $EnvironmentManager = [ManageExecutionEnvironment]::New()
 try {
   $EnvironmentManager.SetPolicy()
   $EnvironmentManager.UnblockModules($VerbosePreference)
+  $EnvironmentManager.MountRegistryDrives()
 
   # Always force re-import in case modules were updated in place.
   Import-Module .\FileManager.psm1 -Force

@@ -45,4 +45,13 @@ class ManageExecutionEnvironment {
       Get-ChildItem -Recurse -Filter *.psm1 | Unblock-File -Verbose
     }
   }
+
+  [void] MountRegistryDrives() {
+    Write-Verbose 'Mounting registry drives for use ...'
+    Write-Verbose (New-PSDrive -Name HKU -PSProvider Registry -Root Registry::HKEY_USERS)
+    Write-Verbose (New-PSDrive -Name HKCR -PSProvider Registry -Root Registry::HKEY_CLASSES_ROOT)
+    Write-Verbose (New-PSDrive -Name HKCC -PSProvider Registry -Root Registry::HKEY_CURRENT_CONFIG)
+    Write-Verbose (New-PSDrive -Name HKCU -PSProvider Registry -Root Registry::HKEY_CURRENT_USER)
+    Write-Verbose (New-PSDrive -Name HKLM -PSProvider Registry -Root Registry::HKEY_LOCAL_MACHINE)
+  }
 }

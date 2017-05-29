@@ -74,34 +74,72 @@ class TweekModule {
   [TweakClassification] $Classification = [TweakClassification]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
 
-  [boolean] _GroupPolicyTweak() {
+  [void] _UpdateRegistryKey($Path, $Key, $Type, $Value) {
+    # Modifies or creates a given registry key with a value.
+    #
+    # This will:
+    # - recursively create path directories as needed.
+    # - properly create new values when none existed.
+    # - properly overwrite an existing value.
+    # - properly creates new subdirectories properly, non-destructively.
+    #
+    # Registry key breakdown:
+    # Computer\HKEY_CURRENT_USER\Software\Microsoft\OneDrive\OptinFolderRedirect = 0
+    #  Path: HKCU:\Software\Microsoft\OneDrive
+    #  Key: OptinFolderRedirect
+    #  Type: DWORD
+    #  Value: 0
+    #
+    # Args:
+    #   Path: String registry path. HKEY Shortcuts: HKLM, HKCR, HKCU, HKCC.
+    #   Key: String registry key name.
+    #   Type: String registry key type. Valid types:
+    #       STRING, EXPANDSTRING, BINARY, DWORD, MULTISTRING, QWORD, UNKNOWN
+    #       (reg_sz, reg_expand_sz, reg_binary, reg_dword, reg_multi_sz, reg_qword, reg_resource_list)
+    #   Value: Data to load into the key.
+    #
+    If (!(Test-Path $Path)) {
+      Write-Host ('    Registry path does not exist, creating: ' + $Path)
+      New-Item -Path $Path -Force
+    }
+    $RegItem = Get-ItemProperty $Path -Name $Key -ErrorAction SilentlyContinue
+    if ($RegItem) {
+      Write-Host ('    Existing: ' + $Path + '\' + $Key + ' = ' + $RegItem.$Key)
+    } else {
+      Write-Host ('    Key does not exist: ' + $Path + '\' + $Key)
+    }
+    Write-Host('    Updating: ' + $Path + '\' + $Key + ' [' + $Type + '] = ' + $Value)
+    New-ItemProperty -Path $Path -Name $Key -PropertyType $Type -Value $Value -Force
+  }
+
+  [void] _DeleteRegistryKey($Path, $Key) {
+    # Deletes a given registry key.
+    $RegItem = Get-ItemProperty $Path -Name $Key -ErrorAction SilentlyContinue
+    if ($RegItem) {
+      Write-Host ('    Existing: ' + $Path + '\' + $Key + ' = ' + $RegItem.$Key)
+      Write-Host ('    Deleting: ' + $Path + '\' + $Key)
+      Remove-ItemProperty -Path $Path -Name $Key -Force
+    }
+  }
+
+  [void] _GroupPolicyTweak() {
     # Apply tweak using Group policy objects.
-    #
-    # Returns:
-    #   Boolean True if the tweak applied successfully, False otherwise.
-    return $false
+    return
   }
 
-  [boolean] _RegistryTweak() {
-    # Apply tweak using registry editor.
-    #
-    # Returns:
-    #   Boolean True if the tweak applied successfully, false otherwise.
-    return $false
+  [void] _RegistryTweak() {
+    # Apply tweak using registry objects.
+    return
   }
 
-  [boolean] _ApplyTweak() {
+  [void] _ApplyTweak() {
     # Apply tweak to the system.
     #
     # This is the system method used to apply this tweak to the system.
     #
-    # Returns:
-    #   Boolean True if the tweak applied successfully, False otherwise.
     Write-Host ('  Applying ' + $this.Name())
-    if ($this._GroupPolicyTweak() -And $this._RegistryTweak()) {
-      return $true
-    }
-    return $false
+    $this._GroupPolicyTweak()
+    $this._RegistryTweak()
   }
 
   [void] _ExecuteOrDryRun($DryRun) {
