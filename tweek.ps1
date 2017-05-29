@@ -17,10 +17,15 @@
     - Unrestricted policy ('Set-ExecutionPolicy Unrestricted' in admin shell)
     - Admin powershell
     - Unblocked modules
+    - Remote Server Administration Tools (for powershell GroupPolicy module)
 
     This script will automatically unblock needed modules, update files from
     the public repo if integrity fails, and set/reset ExecutionPolicy when
     running.
+
+    If the remoate server administration tools are not installed, a warning
+    message will be displayed and tweeks will still be applied, but without
+    GPO capabilities. This could result in half-applied tweeks.
 
 .PARAMETER Unsigned
     Specify to execute modules that do not pass verification hashes.
@@ -52,6 +57,14 @@
 
 .PARAMETER List
     List all modules, their category and classification and what they do.
+
+.PARAMETER NoGroupPolicy
+    Do not attempt to use Group Policy modifications for tweeks.
+
+    By default, group policy modifications are included and require the
+    GroupPolicy powershell module provided by the Remote Server Administration
+    Tools for Windows 10 toolkit. If these are not installed the program will
+    halt execution. This option will bypass this.
 
 .EXAMPLE
     C:\PS> .\tweak.ps1
@@ -97,7 +110,13 @@
     default options that are set.
 
 .LINK
-    https://github.com/r-pufky/tweek
+    Project Source:
+      
+      https://github.com/r-pufky/tweek
+
+    Windows 10 Remote Server Administration Tools:
+    
+      https://www.microsoft.com/en-us/download/details.aspx?id=45520
 
 .NOTES
     Please add additional tweaks to github.com/r-pufky/tweek. All new modules
@@ -111,8 +130,27 @@ param(
   [string]$Classification = 'stable',
   [switch]$DryRun,
   [string]$Tweak = $none,
-  [switch]$List
+  [switch]$List,
+  [switch]$NoGroupPolicy
 )
+
+# TODO: disable _GroupPolicy calls when not detected.
+if (Get-Module -ListAvailable -Name GroupPolicy) {
+  Import-Module GroupPolicy
+} else {
+  Write-Warning (
+    'GroupPolicy powershell modules does not exist. Group policy ' +
+    'modifications are DISABLED. Please see "Get-Help Tweek.ps1" or just ' +
+    'install the Remote Server Administration Tools for Windows 10, which ' +
+    "includes the GroupPolicy powershell module, here:`n`n`t" +
+    "https://www.microsoft.com/en-us/download/details.aspx?id=45520`n`n" +
+    'If you want to force execution, use -NoGroupPolicy option.')
+  if ($NoGroupPolicy) {
+    Write-Warning ("-NoGroupPolicy set, continuing. You've been warned.")
+  } else {
+    exit
+  }
+}
 
 . .\ManageExecutionEnvironment.ps1
 $EnvironmentManager = [ManageExecutionEnvironment]::New()
