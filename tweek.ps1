@@ -80,14 +80,21 @@
     Run MyNewTweak module, do not verify file hashes.
 
 .EXAMPLE
-    C:\PS> .\tweak.ps1 -List -Catagory telemetry
+    C:\PS> .\tweak.ps1 -List
 
-    Lists all modules dealing with telemetry.
+    Lists all modules.
+    
+    **NOTE**: you must specify both Classification and Catagory if you want a
+    specific list of modules back. See blow.
 
 .EXAMPLE
-    C:PS> .\tweak.ps1 -List
+    C:PS> .\tweak.ps1 -List -Classification stable -Catagory telemetry
 
-    Lista all modules for tweek.
+    Lista all stable telemetry modules for tweek.
+
+    **NOTE**: You must specify both Classification and Catagory if you want a
+    specific list of modules back; otherwise all modules are returned due to
+    default options that are set.
 
 .NOTES
     Please add additional tweaks to github.com/r-pufky/tweaker. All new modules
@@ -120,13 +127,7 @@ try {
 
   if ($List) {
     foreach ($Module in $Modules.GetEnumerator()) {
-      if ($Catagory -ne 'all') {
-        if ($Catagory -eq $Module.Value.Catagory) {
-          Write-Output ($Module.Value.TweakInfo())
-        }
-      } else {
-        Write-Output ($Module.Value.TweakInfo())
-      }
+      $Module.Value.TweekList($Classification, $Catagory)
     }
     exit
   }

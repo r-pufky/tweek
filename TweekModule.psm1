@@ -117,6 +117,21 @@ class TweekModule {
     }
   }
 
+  [string] _TweekInfo() {
+    # Returns a string containing information for this tweek.
+    return (
+      "`n{0}`n{1}: {2}`nReferences:`n  {3}`nEdition: {4}`nMinimum Version: {5}`nClassification: {6}`nCatagory: {7}`nValid Module: {8}" -f
+      ('-' * 35),
+      $this.Name(),
+      $this.Description,
+      ($this.PolicyReferences -join "`n  "),
+      $this.Edition,
+      $this.Version,
+      $this.Classification,
+      $this.Catagory,
+      $this.Validate())
+  }
+
   [void] TweekExecute($DryRun, $Classification, $Catagory, $Tweak) {
     # System calls this method to apply the Tweak to the system.
     #
@@ -146,19 +161,26 @@ class TweekModule {
     return $this.GetType().FullName
   }
 
-  [string] TweakInfo() {
-    # Returns a string containing information for this tweek.
-    return (
-      "`n{0}`n{1}: {2}`nReferences:`n  {3}`nEdition: {4}`nMinimum Version: {5}`nClassification: {6}`nCatagory: {7}`nValid Module: {8}" -f
-      ('-' * 35),
-      $this.Name(),
-      $this.Description,
-      ($this.PolicyReferences -join "`n  "),
-      $this.Edition,
-      $this.Version,
-      $this.Classification,
-      $this.Catagory,
-      $this.Validate())
+  [string] TweekList($Classification, $Catagory) {
+    # System calls this to determine if module should list info.
+    #
+    #   Classifcation: String classification specified on the command line.
+    #   Catagory: String catagory specified on the command line.
+    #
+    #   BUG(?): Since classification and catagory have default values, when
+    #     -List is used with one of these but not the other, it assumes all
+    #     tweaks are returned. It's only properly scoped when using -List AND
+    #     both Catagory and Classification.
+    #
+    # Returns:
+    #   String containing information for this tweek.
+    #
+    if (($Catagory -eq 'all') -Or
+        ($Catagory -eq $this.Catagory) -Or
+        ($Classification -eq $this.Classification)) {
+      return $this._TweekInfo()
+    }
+    return $null
   }
 
   [boolean] Validate() {
