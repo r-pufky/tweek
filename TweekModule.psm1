@@ -111,7 +111,11 @@ class TweekModule {
     #   DryRun: Switch if DryRun option was selected on command line.
     #
     if (!($DryRun)) {
-      $this._ApplyTweak()
+      if (!($this.Validate())) {
+        Write-Host ('IGNORE: ' + $this.Name() + ' is not validated and will not run.')
+      } else {
+        $this._ApplyTweak()
+      }
     } else {
       Write-Host ('Dry Run: ' + $this.Name())
     }

@@ -97,7 +97,7 @@
     default options that are set.
 
 .NOTES
-    Please add additional tweaks to github.com/r-pufky/tweaker. All new modules
+    Please add additional tweaks to github.com/r-pufky/tweek. All new modules
     are accepted as long as they are not malicious and follow guidelines.   
 #>
 
