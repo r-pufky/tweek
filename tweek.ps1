@@ -162,10 +162,11 @@ if (Get-Module -ListAvailable -Name PolicyFileEditor) {
     "Install-Module PolicyFileEditor -Force`n`n" +
     'If you want to force execution, use -NoGroupPolicy option, or use ' +
     '-InstallGroupPolicy option to install required tools.')
-} if ($NoGroupPolicy) {
-  Write-Warning ("-NoGroupPolicy set, continuing. You've been warned.")
-} else {
-  exit
+  if ($NoGroupPolicy) {
+    Write-Warning ("-NoGroupPolicy set, continuing. You've been warned.")
+  } else {
+    exit
+  }
 }
 
 . .\ManageExecutionEnvironment.ps1

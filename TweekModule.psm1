@@ -67,6 +67,9 @@ class TweekModule {
   #   Catagory: TweakCatagory enum specifying the type of tweak of the module.
   #       Default: telemetry.
   #
+  # TODO: Break out registry and group policy functionality to support classes
+  #   in this file, as they are essentially static methods.
+  #
   [string[]] $PolicyReferences
   [string] $Description
   [WindowsEdition] $Edition = [WindowsEdition]::home
@@ -140,6 +143,60 @@ class TweekModule {
     }
   }
 
+  [void] _UpdateGroupPolicy($Key, $Name, $Type, $Data) {
+    # Modifies or creates a given group policy key with a value.
+    #
+    # $env:systemroot\system32\GroupPolicy\Machine\
+    # $env:systemroot\system32\GroupPolicy\User\
+    #
+    # Set policies wanted with gpedit.msc, then do
+    # Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -All
+    #  - see modified policies there
+    #
+    #  Enabled = 1
+    #  Disable = 0
+    #  Not configured = removed from policy list.
+    #
+    # To set a policy:
+    # ry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol
+    # -Key Software\Policies\Microsoft\Windows\GameDVR
+    #  -ValueName AllowGameDVR -Type 'DWORD' -Data 0
+    #
+    # Args:
+    #   Key: String group policy key to modify.
+    #   Name: String group policy Name to modify.
+    #   Type: String group policy key data type.
+    #   Value: Data to load into the key name.
+    #
+    # TODO: Clean this up once implemented.
+    $MachinePolicy = "$env:SystemRoot\system32\GroupPolicy\Machine\registry.pol"
+    $UserPolicy = "$env:SystemRoot\system32\GroupPolicy\User\registry.pol"
+    $PolicyItem = Get-PolicyFileEntry -Path $MachinePolicy -Key $Key -ValueName $Name
+    If ($PolicyItem) {
+      Write-Host ('    Existing Group Policy: ' + $PolicyItem.Key + '\' + $PolicyItem.ValueName + ' [' + $PolicyItem.Type + '] = ' + $PolicyItem.Data)
+    } else {
+      Write-Host ('    Group Policy Does Not Exist: ' + $Key + '\' + $Name)
+    }
+    Write-Host('    Updating Group Policy: ' + $Key + '\' + $Name + ' [' + $Type + '] = ' + $Data)
+    Set-PolicyFileEntry -Path $MachinePolicy -Key $Key -ValueName $Name -Type $Type -Data $Data
+  }
+
+  [void] _DeleteGroupPolicy($Key, $Name) {
+    # Deletes a given group policy.
+    # 
+    # Args:
+    #   Key: String group policy key to modify.
+    #   Name: String group policy Name to modify.
+    #
+    $MachinePolicy = "$env:SystemRoot\system32\GroupPolicy\Machine\registry.pol"
+    $PolicyItem = Get-PolicyFileEntry -Path $MachinePolicy -Key $Key -ValueName $Name
+    if ($PolicyItem) {
+      Write-Host ('    Existing Group Policy: ' + $PolicyItem.Key + '\' + $PolicyItem.ValueName + ' [' + $PolicyItem.Type + '] = ' + $PolicyItem.Data)
+      Write-Host ('    Deleting: ' + $Key + '\' + $Name)
+      Remove-PolicyFileEntry -Path $MachinePolicy -Key $Key -ValueName $Name
+    }
+  }
+
   [void] _GroupPolicyTweak() {
     # Apply tweak using Group policy objects.
     return
@@ -158,7 +215,7 @@ class TweekModule {
     # GPO tweaks.
     #
     Write-Host ('  Applying ' + $this.Name())
-    if (Get-Module -ListAvailable -Name GroupPolicy) {
+    if (Get-Module -ListAvailable -Name PolicyFileEditor) {
       $this._GroupPolicyTweak()
     }
     $this._RegistryTweak()
