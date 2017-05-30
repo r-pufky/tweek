@@ -9,6 +9,10 @@ class NewTweek : TweekModule {
   [string] $Description = 'This a new tweak that does things.'
   [TweakClassification] $Classification = [TweakClassification]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
+
+  hidden [void] GroupPolicyTweek() {}
+  hidden [void] RegistryTweek() {}
+
 }
 
 function Load() {

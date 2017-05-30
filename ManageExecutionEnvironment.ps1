@@ -47,6 +47,8 @@ class ManageExecutionEnvironment {
   }
 
   [void] MountRegistryDrives() {
+    # Mount registry hives with shortcuts for easy of use in tweek modules
+    #
     Write-Verbose 'Mounting registry drives for use ...'
     Write-Verbose (New-PSDrive -Name HKU -PSProvider Registry -Root Registry::HKEY_USERS)
     Write-Verbose (New-PSDrive -Name HKCR -PSProvider Registry -Root Registry::HKEY_CLASSES_ROOT)

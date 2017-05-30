@@ -11,10 +11,12 @@ class GroupPolicyTweekTest : TweekModule {
   [TweakClassification] $Classification = [TweakClassification]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 
-  [void] _GroupPolicyTweak() {
-    $this._UpdateGroupPolicy('Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR', 'DWORD', 0)
-    $this._DeleteGroupPolicy('Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR')
+  hidden [void] GroupPolicyTweek() {
+    [TweekModule]::UpdateGroupPolicy('Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR', 'DWORD', 0)
+    [TweekModule]::DeleteGroupPolicy('Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR')
   }
+
+  hidden [void] RegistryTweek() {}
 }
 
 function Load() {

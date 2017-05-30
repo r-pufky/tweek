@@ -11,10 +11,12 @@ class RegistryTweekTest : TweekModule {
   [TweakClassification] $Classification = [TweakClassification]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 
-  [void] _RegistryTweak() {
-    $this._UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version', 'DWORD', 1)
-    $this._UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts', 'Test', 'STRING', 'testing string')
-    $this._DeleteRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version')
+  hidden [void] GroupPolicyTweek() {}
+
+  hidden [void] RegistryTweek() {
+    [TweekModule]::UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version', 'DWORD', 1)
+    [TweekModule]::UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts', 'Test', 'STRING', 'testing string')
+    [TweekModule]::DeleteRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version')
   }
 }
 
