@@ -10,7 +10,7 @@ class FileManager {
   [string] $URI_BASE = 'https://raw.githubusercontent.com/r-pufky/tweek/master'
   [string] $INTEGRITY_HASHES = 'integrity-hashes.sha256'
 
-  [boolean] _VerifyFile($ValidHash, $Target) {
+  hidden [boolean] VerifyFile([string]$ValidHash, $Target) {
     # Verifies file integrity by comparing file's current hash to verified hash.
     #
     # Args:
@@ -24,7 +24,7 @@ class FileManager {
     return $false
   }
 
-  [void] _UpdateFile($File) {
+  hidden [void] UpdateFile($File) {
     # Updates a given file in place, using current working directory
     #
     # Args:
@@ -33,13 +33,13 @@ class FileManager {
     # Returns:
     #   Boolean True if successful, False otherwise.
     #
-    $Uri = $this.URI_BASE + $this._ConvertUri($File)
+    $Uri = $this.URI_BASE + $this.ConvertUri($File)
     Write-Host ('Updating: ' + $File.FullName + ' (' + $Uri + ')')
     $Client = New-Object System.Net.WebClient
     $Client.DownloadFile($Uri, $File)
   }
 
-  [string] _ConvertUri($File) {
+  hidden [string] ConvertUri($File) {
     # Convert a given Item object to a relative URI path.
     #
     # Assumes that file is within the 'tweek' directory. Converts the relative
@@ -54,7 +54,7 @@ class FileManager {
     return $File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.replace('\','/')}
   }
 
-  [hashtable] _GetIntegrityHashes() {
+  hidden [hashtable] GetIntegrityHashes() {
     # Returns integrity hashes for tweek.
     #
     # The hashfile is downloaded from the repository, loaded and returned.
@@ -66,7 +66,7 @@ class FileManager {
     if (!(Test-Path $this.INTEGRITY_HASHES)) {
       New-Item $this.INTEGRITY_HASHES -Type file -Force
     }
-    $this._UpdateFile((Get-Item $this.INTEGRITY_HASHES))
+    $this.UpdateFile((Get-Item $this.INTEGRITY_HASHES))
     foreach ($Line in Get-Content $this.INTEGRITY_HASHES) {
       $VerifiedHash, $FileLocation = $Line.split(' *', [System.StringSplitOptions]::RemoveEmptyEntries)
       $Hashes.Add($FileLocation, $VerifiedHash)
@@ -90,16 +90,16 @@ class FileManager {
     # Raises:
     #   System.IO.FileLoadException for validation error.
     #
-    $Hashes = $this._GetIntegrityHashes()
+    $Hashes = $this.GetIntegrityHashes()
     foreach ($File in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
       $FileKey = ($File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)} | Select-Object -Last 1)
       Write-Verbose ('Validating from filesystem: ' + $FileKey)
-      if ($this._VerifyFile($Hashes[$FileKey], $File.FullName)) {
+      if ($this.VerifyFile($Hashes[$FileKey], $File.FullName)) {
         $Hashes.Remove($FileKey)
         continue
       }
-      $this._UpdateFile($File)
-      if ($this._VerifyFile($Hashes[$FileKey], $File.FullName)) {
+      $this.UpdateFile($File)
+      if ($this.VerifyFile($Hashes[$FileKey], $File.FullName)) {
         $Hashes.Remove($FileKey)
         continue
       } else {
@@ -111,8 +111,8 @@ class FileManager {
       foreach ($Hash in $Hashes.GetEnumerator()) {
         Write-Verbose ('Validating from hashtable: ' + $Hash.Name)
         $File = New-Item $Hash.Name -Type file -Force
-        $this._UpdateFile($File)
-        if (!($this._VerifyFile($Hash.Value, $File.FullName))) {
+        $this.UpdateFile($File)
+        if (!($this.VerifyFile($Hash.Value, $File.FullName))) {
           throw [System.IO.FileLoadException]::new($File.FullName + ' failed to validate [hashlist].')
         }
       }      

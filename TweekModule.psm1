@@ -87,7 +87,7 @@ class TweekModule {
     throw ('Must override GroupPolicyTweek()')
   }
 
-  [void] TweekExecute($DryRun, $Classification, $Catagory, $Tweak) {
+  [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak) {
     # System calls this method to apply the Tweak to the system.
     #
     # This contains the logic to determine what action to execute.
@@ -111,7 +111,7 @@ class TweekModule {
     }
   }
 
-  [string] TweekList($Classification, $Catagory) {
+  [string] TweekList([string]$Classification, [string]$Catagory) {
     # System calls this to determine if module should list info.
     #
     #   Classifcation: String classification specified on the command line.
@@ -181,7 +181,7 @@ class TweekModule {
     $this.RegistryTweek()
   }
 
-  hidden [void] ExecuteOrDryRun($DryRun) {
+  hidden [void] ExecuteOrDryRun([switch]$DryRun) {
     # Executes tweak or logs a dry run.
     #
     # Args:
@@ -198,7 +198,7 @@ class TweekModule {
     }
   }
 
-  static hidden [void] UpdateRegistryKey($Path, $Key, $Type, $Value) {
+  static hidden [void] UpdateRegistryKey([string]$Path, [string]$Key, [string]$Type, $Value) {
     # Modifies or creates a given registry key with a value.
     #
     # This will:
@@ -250,7 +250,7 @@ class TweekModule {
     New-ItemProperty -Path $Path -Name $Key -PropertyType $Type -Value $Value -Force
   }
 
-  static hidden [void] DeleteRegistryKey($Path, $Key) {
+  static hidden [void] DeleteRegistryKey([string]$Path, [string]$Key) {
     # Deletes a given registry key.
     #   
     # Registry key shortcuts:
@@ -262,6 +262,7 @@ class TweekModule {
     #
     # Args:
     #   Path: String registry path. Shortcut usage is ok.
+    #   Key: String registry key name.
     #
     $RegItem = Get-ItemProperty $Path -Name $Key -ErrorAction SilentlyContinue
     if ($RegItem) {
@@ -271,7 +272,7 @@ class TweekModule {
     }
   }
 
-  static hidden [void] UpdateGroupPolicy($PolicyFile, $Key, $Name, $Type, $Data) {
+  static hidden [void] UpdateGroupPolicy([string]$PolicyFile, [string]$Key, [string]$Name, [string]$Type, $Data) {
     # Modifies or creates a given group policy key with a value.
     #
     # $env:systemroot\system32\GroupPolicy\Machine\
@@ -320,7 +321,7 @@ class TweekModule {
     Set-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name -Type $Type -Data $Data
   }
 
-  static hidden [void] DeleteGroupPolicy($PolicyFile, $Key, $Name) {
+  static hidden [void] DeleteGroupPolicy([string]$PolicyFile, [string]$Key, [string]$Name) {
     # Deletes a given group policy.
     # 
     # Args:
