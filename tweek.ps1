@@ -72,6 +72,13 @@
     Instructions to do so manually are here and in warning messages. This just
     does all that automatically for you.
 
+.PARAMETER TestHashes
+    Enable testing mode. This will prevent hashes from being updated from the
+    repository before validating them. This is useful to verify hashfile
+    changes when developing. DISABLES EXECUTION (e.g. simulates a -DryRun).
+
+    You should never use this in NORMAL usage.
+    
 .EXAMPLE
     C:\PS> .\tweak.ps1
 
@@ -142,7 +149,8 @@ param(
   [string]$Tweak = $none,
   [switch]$List,
   [switch]$NoGroupPolicy,
-  [switch]$InstallGroupPolicy
+  [switch]$InstallGroupPolicy,
+  [switch]$TestHashes
 )
 
 if ($InstallGroupPolicy) {
@@ -180,7 +188,7 @@ try {
   Import-Module .\FileManager.psm1 -Force
   $FileManager = NewFileManager
   if (!($Unsigned)) {
-    $FileManager.ValidateAndUpdate($VerbosePreference)
+    $FileManager.ValidateAndUpdate($VerbosePreference, $TestHashes)
   }
   $Modules = $FileManager.ModuleLoader()
 
@@ -193,16 +201,16 @@ try {
 
   if ($Tweak) {
     if ($Modules.ContainsKey($Tweak)) {
-      $Modules[$Tweak].TweekExecute($DryRun, $Classification, $Catagory, $Tweak)
+      $Modules[$Tweak].TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $TestHashes)
     } else {
       throw ($Tweak + ' is not a valid module; check valid modules using -List')
     }
     exit
   }
 
-  Write-Output ('Applying ' + $Catagory + ' tweaks ...')
+  Write-Output ('Applying [Catagory:' + $Catagory + ', Classification:' + $Classification + '] tweaks ...')
   foreach ($Module in $Modules.GetEnumerator()) {
-    $Module.Value.TweekExecute($DryRun, $Classification, $Catagory, $Tweak)
+    $Module.Value.TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $TestHashes)
   }
 } finally {
   $EnvironmentManager.RestorePolicy()

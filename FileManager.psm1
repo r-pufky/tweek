@@ -54,10 +54,16 @@ class FileManager {
     return $File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.replace('\','/')}
   }
 
-  hidden [hashtable] GetIntegrityHashes() {
+  hidden [hashtable] GetIntegrityHashes([switch]$TestHashes) {
     # Returns integrity hashes for tweek.
     #
     # The hashfile is downloaded from the repository, loaded and returned.
+    #
+    # If local testing is set, then the hashfile is not updated before loading
+    # and returning validation hashes.
+    #
+    # Args:
+    #   TestHashes: Switch containing whether local testing is enabled. 
     #
     # Returns
     #   Hashtable containing {[string] relative file location: [string] hash}
@@ -66,7 +72,11 @@ class FileManager {
     if (!(Test-Path $this.INTEGRITY_HASHES)) {
       New-Item $this.INTEGRITY_HASHES -Type file -Force
     }
-    $this.UpdateFile((Get-Item $this.INTEGRITY_HASHES))
+    if (!($TestHashes)) {
+      $this.UpdateFile((Get-Item $this.INTEGRITY_HASHES))
+    } else {
+      Write-Warning ('COMPROMISED (DANGEROUS FLAG USED): -TestHashes option used, not updating hashes from trusted source.')
+    }
     foreach ($Line in Get-Content $this.INTEGRITY_HASHES) {
       $VerifiedHash, $FileLocation = $Line.split(' *', [System.StringSplitOptions]::RemoveEmptyEntries)
       $Hashes.Add($FileLocation, $VerifiedHash)
@@ -74,7 +84,7 @@ class FileManager {
     return $Hashes
   }
 
-  [void] ValidateAndUpdate($VerbosePreference) {
+  [void] ValidateAndUpdate($VerbosePreference, [switch]$TestHashes) {
     # Validates and updates all files related to tweek.
     #
     # A validation hashfile is downloaded and a current file list is generated
@@ -84,13 +94,18 @@ class FileManager {
     # remaining hashes in the hashfile are used to download the missing files
     # and revalidate them.
     #
+    # If local testing is set, then the hashfile is not updated before running
+    # validation checks, and updates are not downloaded. This is only useful
+    # to test hash updates.
+    #
     # Args:
     #   VerbosePreference: Object containing verbosity option.
+    #   TestHashes: Switch containing whether local hash testing is enabled.
     #
     # Raises:
     #   System.IO.FileLoadException for validation error.
     #
-    $Hashes = $this.GetIntegrityHashes()
+    $Hashes = $this.GetIntegrityHashes($TestHashes)
     foreach ($File in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
       $FileKey = ($File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)} | Select-Object -Last 1)
       Write-Verbose ('Validating from filesystem: ' + $FileKey)
@@ -98,8 +113,12 @@ class FileManager {
         $Hashes.Remove($FileKey)
         continue
       }
-      $this.UpdateFile($File)
-      if ($this.VerifyFile($Hashes[$FileKey], $File.FullName)) {
+      if (!($TestHashes)) {
+        $this.UpdateFile($File)
+      } else {
+        Write-Warning ('COMPROMISED (Hash integrity): -TestHashes option selected, ' + $FileKey + ' failed verification, not downloading.')
+      }
+      if (($this.VerifyFile($Hashes[$FileKey], $File.FullName)) -Or ($TestHashes)) {
         $Hashes.Remove($FileKey)
         continue
       } else {
@@ -111,9 +130,13 @@ class FileManager {
       foreach ($Hash in $Hashes.GetEnumerator()) {
         Write-Verbose ('Validating from hashtable: ' + $Hash.Name)
         $File = New-Item $Hash.Name -Type file -Force
-        $this.UpdateFile($File)
-        if (!($this.VerifyFile($Hash.Value, $File.FullName))) {
-          throw [System.IO.FileLoadException]::new($File.FullName + ' failed to validate [hashlist].')
+        if (!($TestHashes)) {
+          $this.UpdateFile($File)
+          if (!($this.VerifyFile($Hash.Value, $File.FullName))) {
+            throw [System.IO.FileLoadException]::new($File.FullName + ' failed to validate [hashlist].')
+          }
+        } else {
+          Write-Warning ('COMPROMISED (Hash integrity): -TestHashes option selected, ' + $Hash.Name + ' failed verification, not downloading.')
         }
       }      
     }
