@@ -17,15 +17,15 @@
     - Unrestricted policy ('Set-ExecutionPolicy Unrestricted' in admin shell)
     - Admin powershell
     - Unblocked modules
-    - Remote Server Administration Tools (for powershell GroupPolicy module)
+    - PolicyFileEditor (powershell module for GPO editing, NuGet Dependency)
 
     This script will automatically unblock needed modules, update files from
     the public repo if integrity fails, and set/reset ExecutionPolicy when
     running.
 
-    If the remoate server administration tools are not installed, a warning
-    message will be displayed and tweeks will still be applied, but without
-    GPO capabilities. This could result in half-applied tweeks.
+    If the PolicyFileEditor module is not installed, a warning message will be
+    displayed and tweeks will still be applied, but without GPO capabilities.
+    This could result in half-applied tweeks.
 
 .PARAMETER Unsigned
     Specify to execute modules that do not pass verification hashes.
@@ -62,9 +62,15 @@
     Do not attempt to use Group Policy modifications for tweeks.
 
     By default, group policy modifications are included and require the
-    GroupPolicy powershell module provided by the Remote Server Administration
-    Tools for Windows 10 toolkit. If these are not installed the program will
-    halt execution. This option will bypass this.
+    GroupPolicy powershell module provided by the PolicyFileEditor module. If
+    this is not installed the program will halt execution. This option will
+    bypass this.
+
+.PARAMETER InstallGroupPolicy
+    Install modules and frameworks required for Group Policy management.
+
+    Instructions to do so manually are here and in warning messages. This just
+    does all that automatically for you.
 
 .EXAMPLE
     C:\PS> .\tweak.ps1
@@ -114,9 +120,13 @@
       
       https://github.com/r-pufky/tweek
 
-    Windows 10 Remote Server Administration Tools:
+    PolicyFileEditor (Module):
     
-      https://www.microsoft.com/en-us/download/details.aspx?id=45520
+      https://www.powershellgallery.com/packages/PolicyFileEditor/2.0.2
+
+    NuGet (Module):
+
+      https://www.powershellgallery.com/packages/NuGet/1.3.3
 
 .NOTES
     Please add additional tweaks to github.com/r-pufky/tweek. All new modules
@@ -131,24 +141,31 @@ param(
   [switch]$DryRun,
   [string]$Tweak = $none,
   [switch]$List,
-  [switch]$NoGroupPolicy
+  [switch]$NoGroupPolicy,
+  [switch]$InstallGroupPolicy
 )
 
-if (Get-Module -ListAvailable -Name GroupPolicy) {
-  Import-Module GroupPolicy
+if ($InstallGroupPolicy) {
+  Write-Warning ('Group policy management toosl requested to be installed, Installing ...')
+  Install-PackageProvider -Name NuGet -Force
+  Install-Module PolicyFileEditor -Force
+}
+
+if (Get-Module -ListAvailable -Name PolicyFileEditor) {
+  Import-Module PolicyFileEditor
 } else {
   Write-Warning (
     'GroupPolicy powershell modules do not exist. Group policy modifications' +
-    ' are DISABLED. Please see "Get-Help Tweek.ps1" or just install the ' +
-    'Remote Server Administration Tools for Windows 10 which include the ' +
-    "GroupPolicy powershell module here:`n`n`t" +
-    "https://www.microsoft.com/en-us/download/details.aspx?id=45520`n`n" +
-    'If you want to force execution, use -NoGroupPolicy option.')
-  if ($NoGroupPolicy) {
-    Write-Warning ("-NoGroupPolicy set, continuing. You've been warned.")
-  } else {
-    exit
-  }
+    ' are DISABLED. Please see "Get-Help Tweek.ps1" or install the ' +
+    "PolicyFileEditor powershell module with the following command:`n`n`t" +
+    "Install-PackageProvider -Name NuGet -Force`n`t" +
+    "Install-Module PolicyFileEditor -Force`n`n" +
+    'If you want to force execution, use -NoGroupPolicy option, or use ' +
+    '-InstallGroupPolicy option to install required tools.')
+} if ($NoGroupPolicy) {
+  Write-Warning ("-NoGroupPolicy set, continuing. You've been warned.")
+} else {
+  exit
 }
 
 . .\ManageExecutionEnvironment.ps1

@@ -90,8 +90,15 @@ class TweekModule {
     #  Type: DWORD
     #  Value: 0
     #
+    # Registry key shortcuts:
+    #    HKLM: HKEY_LOCAL_MACHINE
+    #    HKCR: HKEY_CLASSES_ROOT
+    #    HKCU: HKEY_CURRENT_USER
+    #    HKCC: HKEY_CURRENT_CONFIG
+    #    HKU: HKEY_USERS
+    #
     # Args:
-    #   Path: String registry path. HKEY Shortcuts: HKLM, HKCR, HKCU, HKCC.
+    #   Path: String registry path. Shortcut usage is ok.
     #   Key: String registry key name.
     #   Type: String registry key type. Valid types:
     #       STRING, EXPANDSTRING, BINARY, DWORD, MULTISTRING, QWORD, UNKNOWN
@@ -114,6 +121,17 @@ class TweekModule {
 
   [void] _DeleteRegistryKey($Path, $Key) {
     # Deletes a given registry key.
+    #   
+    # Registry key shortcuts:
+    #    HKLM: HKEY_LOCAL_MACHINE
+    #    HKCR: HKEY_CLASSES_ROOT
+    #    HKCU: HKEY_CURRENT_USER
+    #    HKCC: HKEY_CURRENT_CONFIG
+    #    HKU: HKEY_USERS
+    #
+    # Args:
+    #   Path: String registry path. Shortcut usage is ok.
+    #
     $RegItem = Get-ItemProperty $Path -Name $Key -ErrorAction SilentlyContinue
     if ($RegItem) {
       Write-Host ('    Existing: ' + $Path + '\' + $Key + ' = ' + $RegItem.$Key)
