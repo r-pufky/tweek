@@ -229,6 +229,13 @@ class TweekModule {
     #       (reg_sz, reg_expand_sz, reg_binary, reg_dword, reg_multi_sz, reg_qword, reg_resource_list)
     #   Value: Data to load into the key.
     #
+    # Raises:
+    #   System.ArgumenOutOfRangeException if a correct Type is not set.
+    #
+    $AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
+    if (!($AcceptedValues -contains $Type)) {
+      throw [System.ArgumentOutOfRangeException]::New('UpdateRegistryKey requires Type to be a specific value  [' + $AcceptedValues + '], not: ' + $Type)
+    }
     If (!(Test-Path $Path)) {
       Write-Host ('    Registry path does not exist, creating: ' + $Path)
       New-Item -Path $Path -Force
@@ -264,7 +271,7 @@ class TweekModule {
     }
   }
 
-  static hidden [void] UpdateGroupPolicy($Key, $Name, $Type, $Data) {
+  static hidden [void] UpdateGroupPolicy($PolicyFile, $Key, $Name, $Type, $Data) {
     # Modifies or creates a given group policy key with a value.
     #
     # $env:systemroot\system32\GroupPolicy\Machine\
@@ -284,37 +291,55 @@ class TweekModule {
     #  -ValueName AllowGameDVR -Type 'DWORD' -Data 0
     #
     # Args:
+    #   PolicyFile: String 'Machine' or 'User' local group policy file to modify.
     #   Key: String group policy key to modify.
     #   Name: String group policy Name to modify.
-    #   Type: String group policy key data type.
+    #   Type: String group policy key data type. Valid types:
+    #       STRING, EXPANDSTRING, BINARY, DWORD, MULTISTRING, QWORD, UNKNOWN
+    #       (reg_sz, reg_expand_sz, reg_binary, reg_dword, reg_multi_sz, reg_qword, reg_resource_list)
     #   Value: Data to load into the key name.
     #
-    # TODO: Clean this up once implemented.
-    $MachinePolicy = "$env:SystemRoot\system32\GroupPolicy\Machine\registry.pol"
-    #$UserPolicy = "$env:SystemRoot\system32\GroupPolicy\User\registry.pol"
-    $PolicyItem = Get-PolicyFileEntry -Path $MachinePolicy -Key $Key -ValueName $Name
+    # Raises:
+    #   System.ArgumenOutOfRangeException if a correct PolicyFile is not set.
+    #
+    if (($PolicyFile -ne 'Machine') -And ($PolicyFile -ne 'User')) {
+      throw [System.ArgumentOutOfRangeException]::New("UpdateGroupPolicy requires PolicyFile to be 'Machine' or 'User', not: " + $PolicyFile)
+    }
+    $AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
+    if (!($AcceptedValues -contains $Type)) {
+      throw [System.ArgumentOutOfRangeException]::New('UpdateGroupPolicy requires Type to be a specific value  [' + $AcceptedValues + '], not: ' + $Type)
+    }
+    $Policy = "$env:SystemRoot\system32\GroupPolicy\" + $PolicyFile + '\registry.pol'
+    $PolicyItem = Get-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name
     If ($PolicyItem) {
       Write-Host ('    Existing Group Policy: ' + $PolicyItem.Key + '\' + $PolicyItem.ValueName + ' [' + $PolicyItem.Type + '] = ' + $PolicyItem.Data)
     } else {
       Write-Host ('    Group Policy Does Not Exist: ' + $Key + '\' + $Name)
     }
     Write-Host('    Updating Group Policy: ' + $Key + '\' + $Name + ' [' + $Type + '] = ' + $Data)
-    Set-PolicyFileEntry -Path $MachinePolicy -Key $Key -ValueName $Name -Type $Type -Data $Data
+    Set-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name -Type $Type -Data $Data
   }
 
-  static hidden [void] DeleteGroupPolicy($Key, $Name) {
+  static hidden [void] DeleteGroupPolicy($PolicyFile, $Key, $Name) {
     # Deletes a given group policy.
     # 
     # Args:
+    #   PolicyFile: String 'Machine' or 'User' local group policy file to modify.
     #   Key: String group policy key to modify.
     #   Name: String group policy Name to modify.
     #
-    $MachinePolicy = "$env:SystemRoot\system32\GroupPolicy\Machine\registry.pol"
-    $PolicyItem = Get-PolicyFileEntry -Path $MachinePolicy -Key $Key -ValueName $Name
+    # Raises:
+    #   System.ArgumenOutOfRangeException if a correct PolicyFile is not set.
+    #
+    if (($PolicyFile -ne 'Machine') -And ($PolicyFile -ne 'User')) {
+      throw [System.ArgumentOutOfRangeException]::New("DeleteGroupPolicy requires PolicyFile to be 'Machine' or 'User', not: " + $PolicyFile)
+    }
+    $Policy = "$env:SystemRoot\system32\GroupPolicy\" + $PolicyFile + '\registry.pol'
+    $PolicyItem = Get-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name
     if ($PolicyItem) {
       Write-Host ('    Existing Group Policy: ' + $PolicyItem.Key + '\' + $PolicyItem.ValueName + ' [' + $PolicyItem.Type + '] = ' + $PolicyItem.Data)
       Write-Host ('    Deleting: ' + $Key + '\' + $Name)
-      Remove-PolicyFileEntry -Path $MachinePolicy -Key $Key -ValueName $Name
+      Remove-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name
     }
   }
 
