@@ -189,6 +189,8 @@ try {
   $FileManager = NewFileManager
   if (!($Unsigned)) {
     $FileManager.ValidateAndUpdate($VerbosePreference, $TestHashes)
+  } else {
+    Write-Warning ('COMPROMISED (DANGEROUS FLAG USED): -Unsigned option used, modules CANNOT be trusted but WILL BE executed.')
   }
   $Modules = $FileManager.ModuleLoader()
 
