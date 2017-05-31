@@ -14,9 +14,9 @@ class RegistryTweekTest : TweekModule {
   hidden [void] GroupPolicyTweek() {}
 
   hidden [void] RegistryTweek() {
-    [TweekModule]::UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version', 'DWORD', 1)
-    [TweekModule]::UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts', 'Test', 'STRING', 'testing string')
-    [TweekModule]::DeleteRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version')
+    $this.Registry.UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version', 'DWORD', 1)
+    $this.Registry.UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts', 'Test', 'STRING', 'testing string')
+    $this.Registry.DeleteRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version')
   }
 }
 

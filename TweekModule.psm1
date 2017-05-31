@@ -1,5 +1,8 @@
 ﻿# Base TweekModule class for processing Windows 10 configuration tweaks
 
+Using module .\interfaces\TweekGroupPolicyInterface.psm1
+Using module .\interfaces\TweekRegistryInterface.psm1
+
 # Windows 10 editions based on:
 # https://en.wikipedia.org/wiki/Windows_10_editions#Baseline_editions
 #
@@ -69,6 +72,10 @@ class TweekModule {
   #       of the module. Default: stable.
   #   Catagory: TweakCatagory enum specifying the type of tweak of the module.
   #       Default: telemetry.
+  #   Registry: TweekRegistryInterface object to interact with windows
+  #       registry.
+  #   GroupPolicy: TweekGroupPolicyInterface object to interact with windows
+  #       Group Policy.
   #
   [string[]] $PolicyReferences
   [string] $Description
@@ -76,6 +83,8 @@ class TweekModule {
   [WindowsVersion] $Version = [WindowsVersion]::version_1507
   [TweakClassification] $Classification = [TweakClassification]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
+  [TweekRegistryInterface] $Registry = [TweekRegistryInterface]::New()
+  [TweekGroupPolicyInterface] $GroupPolicy  = [TweekGroupPolicyInterface]::New()
 
   hidden [void] GroupPolicyTweek() {
     # Apply tweaks using Group policy objects.
@@ -84,7 +93,7 @@ class TweekModule {
 
   hidden [void] RegistryTweek() {
     # Apply tweaks using registry objects.
-    throw ('Must override GroupPolicyTweek()')
+    throw ('Must override RegistryTweek()')
   }
 
   [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak, [switch]$TestHashes) {
@@ -199,153 +208,6 @@ class TweekModule {
       Write-Host ('Dry Run: ' + $this.Name())
     }
   }
-
-  static hidden [void] UpdateRegistryKey([string]$Path, [string]$Key, [string]$Type, $Value) {
-    # Modifies or creates a given registry key with a value.
-    #
-    # This will:
-    # - recursively create path directories as needed.
-    # - properly create new values when none existed.
-    # - properly overwrite an existing value.
-    # - properly creates new subdirectories properly, non-destructively.
-    #
-    # Registry key breakdown:
-    # Computer\HKEY_CURRENT_USER\Software\Microsoft\OneDrive\OptinFolderRedirect = 0
-    #  Path: HKCU:\Software\Microsoft\OneDrive
-    #  Key: OptinFolderRedirect
-    #  Type: DWORD
-    #  Value: 0
-    #
-    # Registry key shortcuts:
-    #    HKLM: HKEY_LOCAL_MACHINE
-    #    HKCR: HKEY_CLASSES_ROOT
-    #    HKCU: HKEY_CURRENT_USER
-    #    HKCC: HKEY_CURRENT_CONFIG
-    #    HKU: HKEY_USERS
-    #
-    # Args:
-    #   Path: String registry path. Shortcut usage is ok.
-    #   Key: String registry key name.
-    #   Type: String registry key type. Valid types:
-    #       STRING, EXPANDSTRING, BINARY, DWORD, MULTISTRING, QWORD, UNKNOWN
-    #       (reg_sz, reg_expand_sz, reg_binary, reg_dword, reg_multi_sz, reg_qword, reg_resource_list)
-    #   Value: Data to load into the key.
-    #
-    # Raises:
-    #   System.ArgumenOutOfRangeException if a correct Type is not set.
-    #
-    $AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
-    if (!($AcceptedValues -contains $Type)) {
-      throw [System.ArgumentOutOfRangeException]::New('UpdateRegistryKey requires Type to be a specific value  [' + $AcceptedValues + '], not: ' + $Type)
-    }
-    If (!(Test-Path $Path)) {
-      Write-Host ('    Registry path does not exist, creating: ' + $Path)
-      New-Item -Path $Path -Force
-    }
-    $RegItem = Get-ItemProperty $Path -Name $Key -ErrorAction SilentlyContinue
-    if ($RegItem) {
-      Write-Host ('    Existing: ' + $Path + '\' + $Key + ' = ' + $RegItem.$Key)
-    } else {
-      Write-Host ('    Key does not exist: ' + $Path + '\' + $Key)
-    }
-    Write-Host('    Updating: ' + $Path + '\' + $Key + ' [' + $Type + '] = ' + $Value)
-    New-ItemProperty -Path $Path -Name $Key -PropertyType $Type -Value $Value -Force
-  }
-
-  static hidden [void] DeleteRegistryKey([string]$Path, [string]$Key) {
-    # Deletes a given registry key.
-    #   
-    # Registry key shortcuts:
-    #    HKLM: HKEY_LOCAL_MACHINE
-    #    HKCR: HKEY_CLASSES_ROOT
-    #    HKCU: HKEY_CURRENT_USER
-    #    HKCC: HKEY_CURRENT_CONFIG
-    #    HKU: HKEY_USERS
-    #
-    # Args:
-    #   Path: String registry path. Shortcut usage is ok.
-    #   Key: String registry key name.
-    #
-    $RegItem = Get-ItemProperty $Path -Name $Key -ErrorAction SilentlyContinue
-    if ($RegItem) {
-      Write-Host ('    Existing: ' + $Path + '\' + $Key + ' = ' + $RegItem.$Key)
-      Write-Host ('    Deleting: ' + $Path + '\' + $Key)
-      Remove-ItemProperty -Path $Path -Name $Key -Force
-    }
-  }
-
-  static hidden [void] UpdateGroupPolicy([string]$PolicyFile, [string]$Key, [string]$Name, [string]$Type, $Data) {
-    # Modifies or creates a given group policy key with a value.
-    #
-    # $env:systemroot\system32\GroupPolicy\Machine\
-    # $env:systemroot\system32\GroupPolicy\User\
-    #
-    # Set policies wanted with gpedit.msc, then do
-    # Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -All
-    #  - see modified policies there
-    #
-    #  Enabled = 1
-    #  Disable = 0
-    #  Not configured = removed from policy list.
-    #
-    # To set a policy:
-    # ry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol
-    # -Key Software\Policies\Microsoft\Windows\GameDVR
-    #  -ValueName AllowGameDVR -Type 'DWORD' -Data 0
-    #
-    # Args:
-    #   PolicyFile: String 'Machine' or 'User' local group policy file to modify.
-    #   Key: String group policy key to modify.
-    #   Name: String group policy Name to modify.
-    #   Type: String group policy key data type. Valid types:
-    #       STRING, EXPANDSTRING, BINARY, DWORD, MULTISTRING, QWORD, UNKNOWN
-    #       (reg_sz, reg_expand_sz, reg_binary, reg_dword, reg_multi_sz, reg_qword, reg_resource_list)
-    #   Value: Data to load into the key name.
-    #
-    # Raises:
-    #   System.ArgumenOutOfRangeException if a correct PolicyFile is not set.
-    #
-    if (($PolicyFile -ne 'Machine') -And ($PolicyFile -ne 'User')) {
-      throw [System.ArgumentOutOfRangeException]::New("UpdateGroupPolicy requires PolicyFile to be 'Machine' or 'User', not: " + $PolicyFile)
-    }
-    $AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
-    if (!($AcceptedValues -contains $Type)) {
-      throw [System.ArgumentOutOfRangeException]::New('UpdateGroupPolicy requires Type to be a specific value  [' + $AcceptedValues + '], not: ' + $Type)
-    }
-    $Policy = "$env:SystemRoot\system32\GroupPolicy\" + $PolicyFile + '\registry.pol'
-    $PolicyItem = Get-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name
-    If ($PolicyItem) {
-      Write-Host ('    Existing Group Policy: ' + $PolicyItem.Key + '\' + $PolicyItem.ValueName + ' [' + $PolicyItem.Type + '] = ' + $PolicyItem.Data)
-    } else {
-      Write-Host ('    Group Policy Does Not Exist: ' + $Key + '\' + $Name)
-    }
-    Write-Host('    Updating Group Policy: ' + $Key + '\' + $Name + ' [' + $Type + '] = ' + $Data)
-    Set-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name -Type $Type -Data $Data
-  }
-
-  static hidden [void] DeleteGroupPolicy([string]$PolicyFile, [string]$Key, [string]$Name) {
-    # Deletes a given group policy.
-    # 
-    # Args:
-    #   PolicyFile: String 'Machine' or 'User' local group policy file to modify.
-    #   Key: String group policy key to modify.
-    #   Name: String group policy Name to modify.
-    #
-    # Raises:
-    #   System.ArgumenOutOfRangeException if a correct PolicyFile is not set.
-    #
-    if (($PolicyFile -ne 'Machine') -And ($PolicyFile -ne 'User')) {
-      throw [System.ArgumentOutOfRangeException]::New("DeleteGroupPolicy requires PolicyFile to be 'Machine' or 'User', not: " + $PolicyFile)
-    }
-    $Policy = "$env:SystemRoot\system32\GroupPolicy\" + $PolicyFile + '\registry.pol'
-    $PolicyItem = Get-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name
-    if ($PolicyItem) {
-      Write-Host ('    Existing Group Policy: ' + $PolicyItem.Key + '\' + $PolicyItem.ValueName + ' [' + $PolicyItem.Type + '] = ' + $PolicyItem.Data)
-      Write-Host ('    Deleting: ' + $Key + '\' + $Name)
-      Remove-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name
-    }
-  }
-
 }
 
 Export-ModuleMember -Variable WindowsEdition, WindowsVersion
