@@ -2,6 +2,7 @@
 
 Using module .\interfaces\TweekGroupPolicyInterface.psm1
 Using module .\interfaces\TweekRegistryInterface.psm1
+Using module .\interfaces\TweekServiceInterface.psm1
 
 # Windows 10 editions based on:
 # https://en.wikipedia.org/wiki/Windows_10_editions#Baseline_editions
@@ -64,6 +65,7 @@ class TweekModule {
   #   PolicyReferences: Array of Strings containing links to reference
   #       material for specific tweak. One reference required.
   #   Description: String short description of tweak.
+  #   LongDescription: String long description of tweak. Optional.
   #   Author: String author. Can be email, github ID, etc.
   #   Edition: WindowsEdition enum specifying the lowest Windows edition this
   #       tweak applies to. Default: home.
@@ -77,16 +79,19 @@ class TweekModule {
   #       registry.
   #   GroupPolicy: TweekGroupPolicyInterface object to interact with windows
   #       Group Policy.
+  #   Service: TweekServiceInterface object to interact with windows services.
   #
   [string[]] $PolicyReferences
   [string] $Description
+  [string] $LongDescription
   [string] $Author
   [WindowsEdition] $Edition = [WindowsEdition]::home
   [WindowsVersion] $Version = [WindowsVersion]::version_1507
   [TweakClassification] $Classification = [TweakClassification]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
   [TweekRegistryInterface] $Registry = [TweekRegistryInterface]::New()
-  [TweekGroupPolicyInterface] $GroupPolicy  = [TweekGroupPolicyInterface]::New()
+  [TweekGroupPolicyInterface] $GroupPolicy = [TweekGroupPolicyInterface]::New()
+  [TweekServiceInterface] $ServiceInterface = [TweekServiceInterface]::New()
 
   hidden [void] GroupPolicyTweek() {
     # Apply tweaks using Group policy objects.
@@ -96,6 +101,11 @@ class TweekModule {
   hidden [void] RegistryTweek() {
     # Apply tweaks using registry objects.
     throw ('Must override RegistryTweek()')
+  }
+
+  hidden [void] ServiceTweek() {
+    # Apply tweaks using service manipulations.
+    throw ('Must override ServiceTweek()')
   }
 
   [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak, [switch]$TestHashes) {
@@ -189,11 +199,12 @@ class TweekModule {
     # Automatically checks to see if GroupPolicy module is present to execute
     # GPO tweaks.
     #
-    Write-Host ('  Applying ' + $this.Name())
+    Write-Host ('  Applying ' + $this.Name() + ': ' + $this.Description)
     if (Get-Module -ListAvailable -Name PolicyFileEditor) {
       $this.GroupPolicyTweek()
     }
     $this.RegistryTweek()
+    $this.ServiceTweek()
   }
 
   hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$TestHashes) {

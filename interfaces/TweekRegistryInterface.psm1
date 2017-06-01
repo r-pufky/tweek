@@ -4,6 +4,18 @@
 # with PSDrive, which is done as a one-time setup in
 # ManageExecutionEnvironment.
 #
+# Startup Items (These are not regsitry only!):
+# 1) Show all startup items for the current user (powershell):
+# 
+#   Get-CimInstance Win32_StartupCommand | select-object * | format-list
+#
+# 2) Location will point to the registry location, local file location or 'common startup'
+# 3) If one of those, make tweek for registry or local file
+# 4) If 'common startup' it will reside in:
+#    C:\Users\Username\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+#    C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp
+#    http://www.thewindowsclub.com/startup-folder-in-windows-8
+#
 
 class TweekRegistryInterface {
   [string[]]$AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
@@ -42,7 +54,6 @@ class TweekRegistryInterface {
     # Raises:
     #   System.ArgumenOutOfRangeException if a correct Type is not set.
     #
-    #
     if (!($this.AcceptedValues -contains $Type)) {
       throw [System.ArgumentOutOfRangeException]::New('UpdateRegistryKey requires Type to be a specific value  [' + $this.AcceptedValues + '], not: ' + $Type)
     }
@@ -73,6 +84,9 @@ class TweekRegistryInterface {
     # Args:
     #   Path: String registry path. Shortcut usage is ok.
     #   Key: String registry key name.
+    #
+    # Raises:
+    #   System.ArgumenOutOfRangeException if a correct Type is not set.
     #
     $RegItem = Get-ItemProperty $Path -Name $Key -ErrorAction SilentlyContinue
     if ($RegItem) {
