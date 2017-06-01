@@ -5,9 +5,11 @@
 using module '..\TweekModule.psm1'
 
 class GroupPolicyTweekTest : TweekModule {
+
   [WindowsEdition] $Edition = [WindowsEdition]::pro
   [string[]] $PolicyReferences = @('https://some.shit')
   [string] $Description = 'Tests group policy tweaks.'
+  [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClassification] $Classification = [TweakClassification]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 

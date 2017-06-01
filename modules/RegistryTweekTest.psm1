@@ -8,6 +8,7 @@ class RegistryTweekTest : TweekModule {
   [WindowsEdition] $Edition = [WindowsEdition]::pro
   [string[]] $PolicyReferences = @('https://some.shit')
   [string] $Description = 'Tests registry tweaks.'
+  [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClassification] $Classification = [TweakClassification]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 

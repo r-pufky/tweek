@@ -64,6 +64,7 @@ class TweekModule {
   #   PolicyReferences: Array of Strings containing links to reference
   #       material for specific tweak. One reference required.
   #   Description: String short description of tweak.
+  #   Author: String author. Can be email, github ID, etc.
   #   Edition: WindowsEdition enum specifying the lowest Windows edition this
   #       tweak applies to. Default: home.
   #   Version: WindowsVersion enum specifying the lowest Windows version this
@@ -79,6 +80,7 @@ class TweekModule {
   #
   [string[]] $PolicyReferences
   [string] $Description
+  [string] $Author
   [WindowsEdition] $Edition = [WindowsEdition]::home
   [WindowsVersion] $Version = [WindowsVersion]::version_1507
   [TweakClassification] $Classification = [TweakClassification]::stable
@@ -154,6 +156,9 @@ class TweekModule {
     if ($this.Description -eq $null) {
       return $false
     }
+    if ($this.Author -eq $null) {
+      return $false
+    }
     return $true
   }
 
@@ -199,7 +204,9 @@ class TweekModule {
     #   TestHashes: Switch if Test hashes are being used. Disable execution.
     #
     if (!($DryRun)) {
-      if (!($this.Validate()) -Or ($TestHashes)) {
+      if (!($this.Validate())) {
+        Write-Warning ($this.Name() + ': Is not a valid module, NOT executing. Contact the Module author ' + $this.Author)
+      } elseif ($TestHashes) {
         Write-Host ('IGNORE: ' + $this.Name() + ' is not validated and will not run.')
       } else {
         $this.ApplyTweak()
