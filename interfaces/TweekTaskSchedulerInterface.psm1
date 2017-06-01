@@ -2,10 +2,10 @@
 #
 # All scheduled tasks can be found with Get-ScheduledTask
 #
-# Because of a bug with handling scheduled tasks with spaces in
-# the name of the task (causes (Enable|Disable)-ScheduledTask
-# to fail with invalid argument when using a variable, we search
-# for that task and pipe it to the respective command.
+# Because of a bug with handling scheduled tasks with spaces in the name of the
+# task (causes (Enable|Disable)-ScheduledTask to fail with invalid argument
+# when using a variable), we search for that task and pipe it to the respective
+# command.
 #
 
 class TweekTaskSchedulerInterface {
@@ -42,7 +42,7 @@ class TweekTaskSchedulerInterface {
       throw [System.ArgumentOutOfRangeException]::New('EnableTask requires a valid task name [' + $Name + '] is not a valid task.')
     }
     Write-Host ('    Starting scheduled task: ' + $Name)
-    # Work around for name spacing bug using variable and disable-task
+    # Work around for name spacing bug using variable and enable-task
     Get-ScheduledTask | where-object {($_.TaskName -eq $Name)} | Enable-ScheduledTask
 
   }
