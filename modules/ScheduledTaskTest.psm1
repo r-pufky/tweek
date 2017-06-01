@@ -1,25 +1,25 @@
-﻿# test module for service workings
+﻿# test module for scheduled tasks workings
 #
-# uses tests service locations (BITS).
+# uses tests scheduled tasks locations (Data Integrity Scan for Crash Recovery).
 
 Using module '..\TweekModule.psm1'
 
-class ServiceTweekTest : TweekModule {
+class ScheduledTaskTest : TweekModule {
   [WindowsEdition] $Edition = [WindowsEdition]::pro
   [string[]] $PolicyReferences = @('github.com/r-pufky/tweek')
-  [string] $Description = 'Tests service tweaks.'
+  [string] $Description = 'Tests scheduled task tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClassification] $Classification = [TweakClassification]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::services
 
   hidden [void] ServiceTweek() {
-    $this.ServiceInterface.DisableService('BITS')
-    $this.ServiceInterface.EnableService('BITS')
+    $this.ScheduledTask.DisableTask('Data Integrity Scan for Crash Recovery')
+    $this.ScheduledTask.EnableTask('Data Integrity Scan for Crash Recovery')
   }
 }
 
 function Load() {
-  return [ServiceTweekTest]::New()
+  return [ScheduledTaskTest]::New()
 }
 
 Export-ModuleMember -Function Load

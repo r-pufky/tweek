@@ -2,7 +2,7 @@
 #
 # uses tests group policy locations.
 
-using module '..\TweekModule.psm1'
+Using module '..\TweekModule.psm1'
 
 class GroupPolicyTweekTest : TweekModule {
 
@@ -17,8 +17,6 @@ class GroupPolicyTweekTest : TweekModule {
     $this.GroupPolicy.UpdateGroupPolicy('Machine', 'Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR', 'DWORD', 0)
     $this.GroupPolicy.DeleteGroupPolicy('Machine', 'Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR')
   }
-
-  hidden [void] RegistryTweek() {}
 }
 
 function Load() {

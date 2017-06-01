@@ -3,6 +3,7 @@
 Using module .\interfaces\TweekGroupPolicyInterface.psm1
 Using module .\interfaces\TweekRegistryInterface.psm1
 Using module .\interfaces\TweekServiceInterface.psm1
+Using module .\interfaces\TweekTaskSchedulerInterface.psm1
 
 # Windows 10 editions based on:
 # https://en.wikipedia.org/wiki/Windows_10_editions#Baseline_editions
@@ -80,6 +81,8 @@ class TweekModule {
   #   GroupPolicy: TweekGroupPolicyInterface object to interact with windows
   #       Group Policy.
   #   Service: TweekServiceInterface object to interact with windows services.
+  #   ScheduledTask: TweekTaskSchedulerInterface object to interact with
+  #       windows scheduled tasks.
   #
   [string[]] $PolicyReferences
   [string] $Description
@@ -92,20 +95,22 @@ class TweekModule {
   [TweekRegistryInterface] $Registry = [TweekRegistryInterface]::New()
   [TweekGroupPolicyInterface] $GroupPolicy = [TweekGroupPolicyInterface]::New()
   [TweekServiceInterface] $ServiceInterface = [TweekServiceInterface]::New()
+  [TweekTaskSchedulerInterface] $ScheduledTask = [TweekTaskSchedulerInterface]::New()
 
   hidden [void] GroupPolicyTweek() {
     # Apply tweaks using Group policy objects.
-    throw ('Must override GroupPolicyTweek()')
   }
 
   hidden [void] RegistryTweek() {
     # Apply tweaks using registry objects.
-    throw ('Must override RegistryTweek()')
   }
 
   hidden [void] ServiceTweek() {
     # Apply tweaks using service manipulations.
-    throw ('Must override ServiceTweek()')
+  }
+
+  hidden [void] ScheduledTaskTweek() {
+    # Apply tweaks using task manipulations.
   }
 
   [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak, [switch]$TestHashes) {
@@ -205,6 +210,7 @@ class TweekModule {
     }
     $this.RegistryTweek()
     $this.ServiceTweek()
+    $this.ScheduledTaskTweek()
   }
 
   hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$TestHashes) {

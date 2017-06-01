@@ -2,7 +2,7 @@
 #
 # uses tests registry locations.
 
-using module '..\TweekModule.psm1'
+Using module '..\TweekModule.psm1'
 
 class RegistryTweekTest : TweekModule {
   [WindowsEdition] $Edition = [WindowsEdition]::pro
@@ -11,8 +11,6 @@ class RegistryTweekTest : TweekModule {
   [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClassification] $Classification = [TweakClassification]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
-
-  hidden [void] GroupPolicyTweek() {}
 
   hidden [void] RegistryTweek() {
     $this.Registry.UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version', 'DWORD', 1)
