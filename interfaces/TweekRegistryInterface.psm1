@@ -1,9 +1,12 @@
 ﻿# Provides interface to Windows Group Policy for Tweek Modules.
 #
-# TODO: abstract comments into constants to use in this class.
+# This class assumes that the registry hive shortcuts have already been mapped
+# with PSDrive, which is done as a one-time setup in
+# ManageExecutionEnvironment.
 #
 
 class TweekRegistryInterface {
+  [string[]]$AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
 
   [void] UpdateRegistryKey([string]$Path, [string]$Key, [string]$Type, $Value) {
     # Modifies or creates a given registry key with a value.
@@ -15,11 +18,11 @@ class TweekRegistryInterface {
     # - properly creates new subdirectories properly, non-destructively.
     #
     # Registry key breakdown:
-    # Computer\HKEY_CURRENT_USER\Software\Microsoft\OneDrive\OptinFolderRedirect = 0
-    #  Path: HKCU:\Software\Microsoft\OneDrive
-    #  Key: OptinFolderRedirect
-    #  Type: DWORD
-    #  Value: 0
+    # regedit: Computer\HKEY_CURRENT_USER\Software\Microsoft\OneDrive\OptinFolderRedirect = 0
+    #   Path: HKCU:\Software\Microsoft\OneDrive
+    #   Key: OptinFolderRedirect
+    #   Type: DWORD
+    #   Value: 0
     #
     # Registry key shortcuts:
     #    HKLM: HKEY_LOCAL_MACHINE
@@ -39,9 +42,9 @@ class TweekRegistryInterface {
     # Raises:
     #   System.ArgumenOutOfRangeException if a correct Type is not set.
     #
-    $AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
-    if (!($AcceptedValues -contains $Type)) {
-      throw [System.ArgumentOutOfRangeException]::New('UpdateRegistryKey requires Type to be a specific value  [' + $AcceptedValues + '], not: ' + $Type)
+    #
+    if (!($this.AcceptedValues -contains $Type)) {
+      throw [System.ArgumentOutOfRangeException]::New('UpdateRegistryKey requires Type to be a specific value  [' + $this.AcceptedValues + '], not: ' + $Type)
     }
     If (!(Test-Path $Path)) {
       Write-Host ('    Registry path does not exist, creating: ' + $Path)

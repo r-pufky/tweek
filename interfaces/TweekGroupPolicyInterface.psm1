@@ -1,30 +1,27 @@
 ﻿# Provides interface to Windows registry for Tweek Modules.
 #
-# TODO: abstract comments into constants to use in this class.
+# To configure a new group policy Tweek:
+# 1) Ensure policy you want to set is in default state (e.g unmodified in gpedit.msc)
+# 2) List all Group Policy objects currently set:
+#
+#   Machine Policies:
+#   Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -All
+#
+#   User Policies:
+#   Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\User\registry.pol -All
+#
+#   Generally, local group policy is set at the Machine level.
+#
+# 3) Set your group policy tweek with gpedit.msc
+# 4) Re-run the above commands to see what changed or was added.
+# 5) Use that line for the changed/new data for configuration of group policy tweak.
 #
 
 class TweekGroupPolicyInterface {
-  [string]$MachinePolicy = "$env:SystemRoot\system32\GroupPolicy\Machine\registry.pol"
-  [string]$UserPolicy = "$env:SystemRoot\system32\GroupPolicy\User\registry.pol"
+  [string[]]$AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
 
   [void] UpdateGroupPolicy([string]$PolicyFile, [string]$Key, [string]$Name, [string]$Type, $Data) {
     # Modifies or creates a given group policy key with a value.
-    #
-    # $env:systemroot\system32\GroupPolicy\Machine\
-    # $env:systemroot\system32\GroupPolicy\User\
-    #
-    # Set policies wanted with gpedit.msc, then do
-    # Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -All
-    #  - see modified policies there
-    #
-    #  Enabled = 1
-    #  Disable = 0
-    #  Not configured = removed from policy list.
-    #
-    # To set a policy:
-    # ry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol
-    # -Key Software\Policies\Microsoft\Windows\GameDVR
-    #  -ValueName AllowGameDVR -Type 'DWORD' -Data 0
     #
     # Args:
     #   PolicyFile: String 'Machine' or 'User' local group policy file to modify.
@@ -36,18 +33,15 @@ class TweekGroupPolicyInterface {
     #   Value: Data to load into the key name.
     #
     # Raises:
-    #   System.ArgumenOutOfRangeException if a correct PolicyFile is not set.
+    #   System.ArgumenOutOfRangeException if a correct PolicyFile is not set or wrong Type keyword.
     #
     if (($PolicyFile -ne 'Machine') -And ($PolicyFile -ne 'User')) {
       throw [System.ArgumentOutOfRangeException]::New("UpdateGroupPolicy requires PolicyFile to be 'Machine' or 'User', not: " + $PolicyFile)
     }
-    $AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
-    if (!($AcceptedValues -contains $Type)) {
-      throw [System.ArgumentOutOfRangeException]::New('UpdateGroupPolicy requires Type to be a specific value  [' + $AcceptedValues + '], not: ' + $Type)
+    if (!($this.AcceptedValues -contains $Type)) {
+      throw [System.ArgumentOutOfRangeException]::New('UpdateGroupPolicy requires Type to be a specific value  [' + $this.AcceptedValues + '], not: ' + $Type)
     }
-    #$Policy = "$env:SystemRoot\system32\GroupPolicy\" + $PolicyFile + '\registry.pol'
-    $Policy = $this.MachinePolicy
-    Write-Host ($Policy)
+    $Policy = "$env:SystemRoot\system32\GroupPolicy\" + $PolicyFile + '\registry.pol'
     $PolicyItem = Get-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name
     If ($PolicyItem) {
       Write-Host ('    Existing Group Policy: ' + $PolicyItem.Key + '\' + $PolicyItem.ValueName + ' [' + $PolicyItem.Type + '] = ' + $PolicyItem.Data)
