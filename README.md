@@ -15,7 +15,7 @@ with the -InstallGroupPolicy option).
 
 ```powershell
 Install-PackageProvider -Name NuGet -Force
-  Install-Module PolicyFileEditor -Force
+Install-Module PolicyFileEditor -Force
 ```
 
 PolicyFileEditor (Module): https://www.powershellgallery.com/packages/PolicyFileEditor/2.0.2
