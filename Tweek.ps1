@@ -137,7 +137,16 @@
 
 .NOTES
     Please add additional tweaks to github.com/r-pufky/tweek. All new modules
-    are accepted as long as they are not malicious and follow guidelines.   
+    are accepted as long as they are not malicious and follow guidelines.
+    
+    BUGS:
+    Currently, there is a bug in powershell that is scheduled to be patched in
+    6.1; wherein subclasses and submodules are not reloaded properly even with
+    the -Force option set. Until this is patched, you may need to restart your
+    powershell environment if a core file was updated.
+
+    https://github.com/PowerShell/PowerShell/issues/2505#issuecomment-263105859
+  
 #>
 
 [cmdletbinding()] 

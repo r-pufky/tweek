@@ -7,6 +7,8 @@
 # when using a variable), we search for that task and pipe it to the respective
 # command.
 #
+# https://github.com/PowerShell/PowerShell/issues/3915
+#
 
 class TweekTaskSchedulerInterface {
 
