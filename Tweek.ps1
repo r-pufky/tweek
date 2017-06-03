@@ -4,7 +4,7 @@
 .DESCRIPTION
     The intended purpose of this program is to provie an easy, trackable and
     Modular mechanism to apply various tweaks that you may want to a Windows
-    10 syetem, without dealing with all the shitty code out there (this shitty
+    10 system, without dealing with all the shitty code out there (this shitty
     code not withstanding).
    
     All files are hashed and verified by default on launch to verify that code
@@ -72,10 +72,12 @@
     Instructions to do so manually are here and in warning messages. This just
     does all that automatically for you.
 
-.PARAMETER TestHashes
+.PARAMETER Testing
     Enable testing mode. This will prevent hashes from being updated from the
-    repository before validating them. This is useful to verify hashfile
-    changes when developing. DISABLES EXECUTION (e.g. simulates a -DryRun).
+    repository before validating them, as well as loading testing modules from
+    .\testdata\. DISABLES EXECUTION (e.g. simulates a -DryRun) for normal
+    modules.  This is useful to verify hashfile changes when developing, as
+    well as writing modules for testing new interfaces.
 
     You should never use this in NORMAL usage.
     
@@ -159,7 +161,7 @@ param(
   [switch]$List,
   [switch]$NoGroupPolicy,
   [switch]$InstallGroupPolicy,
-  [switch]$TestHashes
+  [switch]$Testing
 )
 
 if ($InstallGroupPolicy) {
@@ -197,11 +199,18 @@ try {
   Import-Module .\FileManager.psm1 -Force
   $FileManager = NewFileManager
   if (!($Unsigned)) {
-    $FileManager.ValidateAndUpdate($VerbosePreference, $TestHashes)
+    $FileManager.ValidateAndUpdate($VerbosePreference, $Testing)
   } else {
     Write-Warning ('COMPROMISED (DANGEROUS FLAG USED): -Unsigned option used, modules CANNOT be trusted but WILL BE executed.')
   }
-  $Modules = $FileManager.ModuleLoader()
+  $Modules = $FileManager.ModuleLoader('.\modules\')
+  if ($Testing) {
+    Write-Output ('-Testing option used, injecting test modules ...')
+    foreach ($TestModule in ($FileManager.ModuleLoader('.\testdata\')).GetEnumerator()) {
+      Write-Verbose ($TestModule.Name)
+      $Modules.Set_Item($TestModule.Name, $TestModule.Value)
+    }
+  }
 
   if ($List) {
     foreach ($Module in $Modules.GetEnumerator()) {
@@ -212,7 +221,7 @@ try {
 
   if ($Tweak) {
     if ($Modules.ContainsKey($Tweak)) {
-      $Modules[$Tweak].TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $TestHashes)
+      $Modules[$Tweak].TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $Testing)
     } else {
       throw ($Tweak + ' is not a valid module; check valid modules using -List')
     }
@@ -221,7 +230,7 @@ try {
 
   Write-Output ('Applying [Catagory:' + $Catagory + ', Classification:' + $Classification + '] tweaks ...')
   foreach ($Module in $Modules.GetEnumerator()) {
-    $Module.Value.TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $TestHashes)
+    $Module.Value.TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $Testing)
   }
 } finally {
   $EnvironmentManager.RestorePolicy()

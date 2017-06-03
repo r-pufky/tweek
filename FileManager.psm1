@@ -56,7 +56,7 @@ class FileManager {
     return $File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.replace('\','/')}
   }
 
-  hidden [hashtable] GetIntegrityHashes([switch]$TestHashes) {
+  hidden [hashtable] GetIntegrityHashes([switch]$Testing) {
     # Returns integrity hashes for tweek.
     #
     # The hashfile is downloaded from the repository, loaded and returned.
@@ -65,7 +65,7 @@ class FileManager {
     # and returning validation hashes.
     #
     # Args:
-    #   TestHashes: Switch containing whether local testing is enabled. 
+    #   Testing: Switch containing whether local testing is enabled. 
     #
     # Returns
     #   Hashtable containing {[string] relative file location: [string] hash}
@@ -74,10 +74,10 @@ class FileManager {
     if (!(Test-Path $this.INTEGRITY_HASHES)) {
       New-Item $this.INTEGRITY_HASHES -Type file -Force
     }
-    if (!($TestHashes)) {
+    if (!($Testing)) {
       $this.UpdateFile((Get-Item $this.INTEGRITY_HASHES))
     } else {
-      Write-Warning ('COMPROMISED (DANGEROUS FLAG USED): -TestHashes option used, not updating hashes from trusted source.')
+      Write-Warning ('COMPROMISED (DANGEROUS FLAG USED): -Testing option used, not updating hashes from trusted source.')
     }
     foreach ($Line in Get-Content $this.INTEGRITY_HASHES) {
       $VerifiedHash, $FileLocation = $Line.split(' *', [System.StringSplitOptions]::RemoveEmptyEntries)
@@ -86,7 +86,7 @@ class FileManager {
     return $Hashes
   }
 
-  [void] ValidateAndUpdate($VerbosePreference, [switch]$TestHashes) {
+  [void] ValidateAndUpdate($VerbosePreference, [switch]$Testing) {
     # Validates and updates all files related to tweek.
     #
     # A validation hashfile is downloaded and a current file list is generated
@@ -102,12 +102,12 @@ class FileManager {
     #
     # Args:
     #   VerbosePreference: Object containing verbosity option.
-    #   TestHashes: Switch containing whether local hash testing is enabled.
+    #   Testing: Switch containing whether local hash testing is enabled.
     #
     # Raises:
     #   System.IO.FileLoadException for validation error.
     #
-    $Hashes = $this.GetIntegrityHashes($TestHashes)
+    $Hashes = $this.GetIntegrityHashes($Testing)
     foreach ($File in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
       $FileKey = ($File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)} | Select-Object -Last 1)
       Write-Verbose ('Validating from filesystem: ' + $FileKey)
@@ -115,12 +115,12 @@ class FileManager {
         $Hashes.Remove($FileKey)
         continue
       }
-      if (!($TestHashes)) {
+      if (!($Testing)) {
         $this.UpdateFile($File)
       } else {
-        Write-Warning ('COMPROMISED (Hash integrity): -TestHashes option selected, ' + $FileKey + ' failed verification, not downloading.')
+        Write-Warning ('COMPROMISED (Hash integrity): -Testing option selected, ' + $FileKey + ' failed verification, not downloading.')
       }
-      if (($this.VerifyFile($Hashes[$FileKey], $File.FullName)) -Or ($TestHashes)) {
+      if (($this.VerifyFile($Hashes[$FileKey], $File.FullName)) -Or ($Testing)) {
         $Hashes.Remove($FileKey)
         continue
       } else {
@@ -131,28 +131,31 @@ class FileManager {
     if ($Hashes.Count -ne 0) {
       foreach ($Hash in $Hashes.GetEnumerator()) {
         Write-Verbose ('Validating from hashtable: ' + $Hash.Name)
-        if (!($TestHashes)) {
+        if (!($Testing)) {
           $File = New-Item $Hash.Name -Type file -Force
           $this.UpdateFile($File)
           if (!($this.VerifyFile($Hash.Value, $File.FullName))) {
             throw [System.IO.FileLoadException]::new($File.FullName + ' failed to validate [hashlist].')
           }
         } else {
-          Write-Warning ('COMPROMISED (Hash integrity): -TestHashes option selected, ' + $Hash.Name + ' failed verification, not downloading.')
+          Write-Warning ('COMPROMISED (Hash integrity): -Testing option selected, ' + $Hash.Name + ' failed verification, not downloading.')
         }
       }      
     }
   }
 
-  [hashtable] ModuleLoader() {
+  [hashtable] ModuleLoader($ModulePath) {
     # Dynamically load all Tweek modules for use.
     # 
+    # Args:
+    #   ModulePath: String relative path of modules to load.
+    #
     # Returns:
     #   Hashtable containing loaded TweekModule class objects
     #   {[string] ClassName: [TweakModule] tweek object}
     #
     $Modules = @{}
-    foreach ($File in Get-ChildItem '.\modules\' -Filter '*.psm1') {
+    foreach ($File in Get-ChildItem $ModulePath -Filter '*.psm1') {
       Import-Module $File.FullName -Force
       $ClassName = ((Get-Module $File.BaseName).ImplementingAssembly.DefinedTypes | where IsPublic).Name
       $ModuleObject = invoke-command -scriptblock (get-command 'Load' -CommandType Function -Module $ClassName).ScriptBlock

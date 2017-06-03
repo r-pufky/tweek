@@ -113,7 +113,7 @@ class TweekModule {
     # Apply tweaks using task manipulations.
   }
 
-  [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak, [switch]$TestHashes) {
+  [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak, [switch]$Testing) {
     # System calls this method to apply the Tweak to the system.
     #
     # This contains the logic to determine what action to execute.
@@ -125,14 +125,14 @@ class TweekModule {
     #   Classifcation: String classification specified on the command line.
     #   Catagory: String catagory specified on the command line.
     #   Tweak: String specific tweak to run on the command line.
-    #   TestHashes: Switch if Test hashes are being used. Disable execution.
+    #   Testing: Switch if Test hashes are being used. Disable execution.
     #
     if (($Tweak) -And ($Tweak -eq $this.Name())) {
-      $this.ExecuteOrDryRun($DryRun, $TestHashes)
+      $this.ExecuteOrDryRun($DryRun, $Testing)
     } else {
       if (($Catagory -eq 'all') -Or ($Catagory -eq $this.Catagory)) {
         if ($Classification -eq $this.Classification) {
-          $this.ExecuteOrDryRun($DryRun, $TestHashes)
+          $this.ExecuteOrDryRun($DryRun, $Testing)
         } 
       }
     }
@@ -213,17 +213,17 @@ class TweekModule {
     $this.ScheduledTaskTweek()
   }
 
-  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$TestHashes) {
+  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing) {
     # Executes tweak or logs a dry run.
     #
     # Args:
     #   DryRun: Switch if DryRun option was selected on command line.
-    #   TestHashes: Switch if Test hashes are being used. Disable execution.
+    #   Testing: Switch if Test hashes are being used. Disable execution.
     #
     if (!($DryRun)) {
       if (!($this.Validate())) {
         Write-Warning ($this.Name() + ': Is not a valid module, NOT executing. Contact the Module author ' + $this.Author)
-      } elseif ($TestHashes) {
+      } elseif ($Testing) {
         Write-Host ('IGNORE: ' + $this.Name() + ' is not validated and will not run.')
       } else {
         $this.ApplyTweak()
