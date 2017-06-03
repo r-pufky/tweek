@@ -17,9 +17,11 @@ class FileManager {
     #   ValidHash: String known hash to compare with file hash.
     #   Target: Item object containing FullName path to file to verify.
     #
-    $Hash = Get-FileHash $Target -Algorithm 'SHA256'
-    if ($ValidHash -eq $Hash.hash) {
-      return $true
+    if (Test-Path $Target) {
+      $Hash = Get-FileHash $Target -Algorithm 'SHA256'
+      if ($ValidHash -eq $Hash.hash) {
+        return $true
+      }
     }
     return $false
   }
@@ -129,8 +131,8 @@ class FileManager {
     if ($Hashes.Count -ne 0) {
       foreach ($Hash in $Hashes.GetEnumerator()) {
         Write-Verbose ('Validating from hashtable: ' + $Hash.Name)
-        $File = New-Item $Hash.Name -Type file -Force
         if (!($TestHashes)) {
+          $File = New-Item $Hash.Name -Type file -Force
           $this.UpdateFile($File)
           if (!($this.VerifyFile($Hash.Value, $File.FullName))) {
             throw [System.IO.FileLoadException]::new($File.FullName + ' failed to validate [hashlist].')
