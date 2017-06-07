@@ -224,7 +224,7 @@ class TweekModule {
       if (!($this.Validate())) {
         Write-Warning ($this.Name() + ': Is not a valid module, NOT executing. Contact the Module author ' + $this.Author)
       } elseif ($Testing) {
-        Write-Host ('IGNORE: ' + $this.Name() + ' is not validated and will not run.')
+        Write-Host ('IGNORE: ' + $this.Name() + ' -Testing option used and will not run.')
       } else {
         $this.ApplyTweak()
       }

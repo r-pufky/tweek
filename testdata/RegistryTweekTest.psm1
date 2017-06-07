@@ -17,6 +17,8 @@ class RegistryTweekTest : TweekModule {
     $this.Registry.UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts', 'Test', 'STRING', 'testing string')
     $this.Registry.DeleteRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version')
   }
+
+  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing) { $this.ApplyTweak() }
 }
 
 function Load() {

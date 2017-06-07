@@ -79,7 +79,8 @@
     modules.  This is useful to verify hashfile changes when developing, as
     well as writing modules for testing new interfaces.
 
-    You should never use this in NORMAL usage.
+    You should never use this in NORMAL usage. If you are developing a new
+    Tweak that is unrelated to an Interface, you probably want -Unsigned.
     
 .EXAMPLE
     C:\PS> .\tweak.ps1
@@ -199,7 +200,10 @@ try {
   Import-Module .\FileManager.psm1 -Force
   $FileManager = NewFileManager
   if (!($Unsigned)) {
-    $FileManager.ValidateAndUpdate($VerbosePreference, $Testing)
+    if ($FileManager.ValidateAndUpdate($VerbosePreference, $Testing)) {
+      Write-Error ('Files were updated. Please RESTART powershell environment. See Help for details.')
+      exit
+    }
   } else {
     Write-Warning ('COMPROMISED (DANGEROUS FLAG USED): -Unsigned option used, modules CANNOT be trusted but WILL BE executed.')
   }

@@ -86,7 +86,7 @@ class FileManager {
     return $Hashes
   }
 
-  [void] ValidateAndUpdate($VerbosePreference, [switch]$Testing) {
+  [boolean] ValidateAndUpdate($VerbosePreference, [switch]$Testing) {
     # Validates and updates all files related to tweek.
     #
     # A validation hashfile is downloaded and a current file list is generated
@@ -107,6 +107,11 @@ class FileManager {
     # Raises:
     #   System.IO.FileLoadException for validation error.
     #
+    # Returns:
+    #   Boolean True if files were update, False otherwise. This only exists
+    #   until -Force option bug in powershell is fixed.
+    #
+    $UpdatedFiles = $false
     $Hashes = $this.GetIntegrityHashes($Testing)
     foreach ($File in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
       $FileKey = ($File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)} | Select-Object -Last 1)
@@ -117,6 +122,7 @@ class FileManager {
       }
       if (!($Testing)) {
         $this.UpdateFile($File)
+        $UpdatedFiles = $true
       } else {
         Write-Warning ('COMPROMISED (Hash integrity): -Testing option selected, ' + $FileKey + ' failed verification, not downloading.')
       }
@@ -134,6 +140,7 @@ class FileManager {
         if (!($Testing)) {
           $File = New-Item $Hash.Name -Type file -Force
           $this.UpdateFile($File)
+          $UpdatedFiles = $true
           if (!($this.VerifyFile($Hash.Value, $File.FullName))) {
             throw [System.IO.FileLoadException]::new($File.FullName + ' failed to validate [hashlist].')
           }
@@ -142,6 +149,7 @@ class FileManager {
         }
       }      
     }
+    return $UpdatedFiles
   }
 
   [hashtable] ModuleLoader($ModulePath) {
