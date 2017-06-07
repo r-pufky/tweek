@@ -4,6 +4,7 @@ Using module .\interfaces\TweekGroupPolicyInterface.psm1
 Using module .\interfaces\TweekRegistryInterface.psm1
 Using module .\interfaces\TweekServiceInterface.psm1
 Using module .\interfaces\TweekTaskSchedulerInterface.psm1
+Using module .\interfaces\TweekFileInterface.psm1
 
 # Windows 10 editions based on:
 # https://en.wikipedia.org/wiki/Windows_10_editions#Baseline_editions
@@ -83,6 +84,7 @@ class TweekModule {
   #   Service: TweekServiceInterface object to interact with windows services.
   #   ScheduledTask: TweekTaskSchedulerInterface object to interact with
   #       windows scheduled tasks.
+  #   File: TweekFileInterface object to interact with files.
   #
   [string[]] $PolicyReferences
   [string] $Description
@@ -96,6 +98,7 @@ class TweekModule {
   [TweekGroupPolicyInterface] $GroupPolicy = [TweekGroupPolicyInterface]::New()
   [TweekServiceInterface] $ServiceInterface = [TweekServiceInterface]::New()
   [TweekTaskSchedulerInterface] $ScheduledTask = [TweekTaskSchedulerInterface]::New()
+  [TweekFileInterface] $File = [TweekFileInterface]::New()
 
   hidden [void] GroupPolicyTweek() {
     # Apply tweaks using Group policy objects.
@@ -111,6 +114,10 @@ class TweekModule {
 
   hidden [void] ScheduledTaskTweek() {
     # Apply tweaks using task manipulations.
+  }
+
+  hidden [void] FileTweek() {
+    # Apply tweaks using file manipulations.
   }
 
   [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak, [switch]$Testing) {
@@ -211,6 +218,7 @@ class TweekModule {
     $this.RegistryTweek()
     $this.ServiceTweek()
     $this.ScheduledTaskTweek()
+    $this.FileTweek()
   }
 
   hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing) {
