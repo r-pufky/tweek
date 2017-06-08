@@ -192,10 +192,11 @@ class TweekModule {
   hidden [string] TweekInfo() {
     # Returns a string containing information for this tweek.
     return (
-      "`n{0}`n{1}: {2}`nReferences:`n  {3}`nEdition: {4}`nMinimum Version: {5}`nClassification: {6}`nCatagory: {7}`nValid Module: {8}" -f
+      "`n{0}`n{1}: {2}`nDetailed Description:`n  {3}`nReferences:`n {4}`nEdition: {5}`nMinimum Version: {6}`nClassification: {7}`nCatagory: {8}`nValid Module: {9}" -f
       ('-' * 35),
       $this.Name(),
       $this.Description,
+      $this.LongDescription,
       ($this.PolicyReferences -join "`n  "),
       $this.Edition,
       $this.Version,
