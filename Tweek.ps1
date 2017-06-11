@@ -226,7 +226,7 @@ try {
 
   if ($Tweak) {
     if ($Modules.ContainsKey($Tweak)) {
-      $Modules[$Tweak].TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $Testing)
+      $Modules[$Tweak].TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $Testing, $WindowsVersion)
     } else {
       throw ($Tweak + ' is not a valid module; check valid modules using -List')
     }
@@ -235,7 +235,7 @@ try {
 
   Write-Output ('Applying [Catagory:' + $Catagory + ', Classification:' + $Classification + '] tweaks ...')
   foreach ($Module in $Modules.GetEnumerator()) {
-    $Module.Value.TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $Testing)
+    $Module.Value.TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $Testing, $WindowsVersion)
   }
 } finally {
   $EnvironmentManager.RestorePolicy()

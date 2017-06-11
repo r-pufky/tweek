@@ -57,15 +57,15 @@ class ManageExecutionEnvironment {
     Write-Verbose (New-PSDrive -Name HKLM -PSProvider Registry -Root Registry::HKEY_LOCAL_MACHINE)
   }
 
-  [Array] GetWindowsVersion() {
+  [array] GetWindowsVersion() {
     # Returns the current Windows 10 release information from the environment.
     #
     # Returns:
-    #   Array containing ([String] Edition, [Integer] Version).
+    #   Array containing ([string] Edition, [integer] Version).
     #
     $Edition = Get-WmiObject -Class Win32_OperatingSystem | ForEach-Object -MemberName Caption
     $Version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").ReleaseId
-    Write-Verbose ('Edition: ' + $Edition + '; Version: ' + $Version)
+    Write-Host ('Detected: ' + $Edition + '; Version: ' + $Version)
     return @($Edition, [int]$Version)
   }
 }

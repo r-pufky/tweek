@@ -120,7 +120,7 @@ class TweekModule {
     # Apply tweaks using file manipulations.
   }
 
-  [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak, [switch]$Testing) {
+  [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak, [switch]$Testing, [array]$WindowsVersion) {
     # System calls this method to apply the Tweak to the system.
     #
     # This contains the logic to determine what action to execute.
@@ -133,13 +133,15 @@ class TweekModule {
     #   Catagory: String catagory specified on the command line.
     #   Tweak: String specific tweak to run on the command line.
     #   Testing: Switch if Test hashes are being used. Disable execution.
+    #   WindowsVersion: Array (String, Integer) containing current environment
+    #       execution environment.
     #
     if (($Tweak) -And ($Tweak -eq $this.Name())) {
-      $this.ExecuteOrDryRun($DryRun, $Testing)
+      $this.ExecuteOrDryRun($DryRun, $Testing, $WindowsVersion)
     } else {
       if (($Catagory -eq 'all') -Or ($Catagory -eq $this.Catagory)) {
         if ($Classification -eq $this.Classification) {
-          $this.ExecuteOrDryRun($DryRun, $Testing)
+          $this.ExecuteOrDryRun($DryRun, $Testing, $WindowsVersion)
         } 
       }
     }
@@ -222,12 +224,14 @@ class TweekModule {
     $this.FileTweek()
   }
 
-  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing) {
+  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing, [array]$WindowsVersion) {
     # Executes tweak or logs a dry run.
     #
     # Args:
     #   DryRun: Switch if DryRun option was selected on command line.
     #   Testing: Switch if Test hashes are being used. Disable execution.
+    #   WindowsVersion: Array (String, Integer) containing current environment
+    #       execution environment.
     #
     if (!($DryRun)) {
       if (!($this.Validate())) {
