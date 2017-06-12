@@ -9,6 +9,7 @@
   @80 characters.
 * Vars in Docstrings: one line preferred. If multiline, newline, 4 space
   indent and wrap at 80 chars.
+* Any unused options do not need to be filled out / created.
 
 ```Docstring
 # One line descriptor of method
@@ -29,6 +30,18 @@
 #
 ```
 
+```Docstring
+# One line descriptor of class
+#
+# Additional information pertaining to class and how it works.
+#
+# Properties:
+#   [property]: [datatype] short description of property.
+#   [property]:
+#       [Datatype] more than 80 character description of variable and/or how
+#       the data is structured or used.
+#
+```
 
 ## New Modules
 
