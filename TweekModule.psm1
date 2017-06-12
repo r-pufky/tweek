@@ -167,7 +167,7 @@ class TweekModule {
       $this.ExecuteOrDryRun()
     } else {
       if (($this._Catagory -eq 'all') -Or ($this._Catagory -eq $this.Catagory)) {
-        if ($this._Classification -eq $this.Classification) {
+        if (($this._Classification -eq 'all') -Or ($this._Classification -eq $this.Classification)) {
           $this.ExecuteOrDryRun()
         } 
       }
@@ -180,16 +180,12 @@ class TweekModule {
     #   Classifcation: String classification specified on the command line.
     #   Catagory: String catagory specified on the command line.
     #
-    #   BUG(?): Since classification and catagory have default values, when
-    #     -List is used with one of these but not the other, it assumes all
-    #     tweaks are returned. It's only properly scoped when using -List AND
-    #     both Catagory and Classification.
-    #
     # Returns:
     #   String containing information for this tweek.
     #
     if (($this._Catagory -eq 'all') -Or
         ($this._Catagory -eq $this.Catagory) -Or
+        ($this._Classification -eq 'all') -Or
         ($this._Classification -eq $this.Classification)) {
       return $this.TweekInfo()
     }

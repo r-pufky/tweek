@@ -123,7 +123,7 @@ class FileManager {
     #
     $VerbosePreference = $this._VerbosePreference
     $UpdatedFiles = $false
-    $Hashes = $this.GetIntegrityHashes($this._Testing)
+    $Hashes = $this.GetIntegrityHashes()
     foreach ($File in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
       $FileKey = ($File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)} | Select-Object -Last 1)
       Write-Verbose ('Validating from filesystem: ' + $FileKey)

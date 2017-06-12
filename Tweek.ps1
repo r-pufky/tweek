@@ -36,18 +36,21 @@
     are testing new code or modules.
 
 .PARAMETER Catagory
-    What type of tweaks to run. Default: 'all'.
+    What type of tweaks to run.
     Values:   firewall, services, filesystem, telemetry, system, all
 
 .PARAMETER Classification
     What class of tweaks should be applied. Default: 'stable'.
-    Values: stable, unstable, optional
+    Values: stable, unstable, optional, all
 
     Unstable modules are signed but haven't been vetted throughly. These could
     be DANGEROUS.
 
     Optional modules address a specific tweak for hardware or software, and
     shouldn't be run by default for most users.
+
+    Don't use "all" when applying tweaks, you install unsupported tweeks too;
+    this is useful to see all tweaks you want to apply (e.g. with -List).
 
 .PARAMETER DryRun
     Simulate running modules instead of actually running them.
@@ -155,8 +158,8 @@
 [cmdletbinding()] 
 param(
   [switch]$Unsigned,
-  [string]$Catagory = 'all',
-  [string]$Classification = 'stable',
+  [string]$Catagory,
+  [string]$Classification,
   [switch]$DryRun,
   [string]$Tweak = $none,
   [switch]$List,
