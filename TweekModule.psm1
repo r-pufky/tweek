@@ -183,11 +183,10 @@ class TweekModule {
     # Returns:
     #   String containing information for this tweek.
     #
-    if (($this._Catagory -eq 'all') -Or
-        ($this._Catagory -eq $this.Catagory) -Or
-        ($this._Classification -eq 'all') -Or
-        ($this._Classification -eq $this.Classification)) {
-      return $this.TweekInfo()
+    if (($this._Catagory -eq 'all') -Or ($this._Catagory -eq $this.Catagory)) {
+      if (($this._Classification -eq 'all') -Or ($this._Classification -eq $this.Classification)) {
+        return $this.TweekInfo()
+      }
     }
     return $null
   }

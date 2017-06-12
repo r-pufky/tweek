@@ -39,8 +39,10 @@
     What type of tweaks to run.
     Values:   firewall, services, filesystem, telemetry, system, all
 
+    Must be used in conjunction with -Classification.
+
 .PARAMETER Classification
-    What class of tweaks should be applied. Default: 'stable'.
+    What class of tweaks should be applied.
     Values: stable, unstable, optional, all
 
     Unstable modules are signed but haven't been vetted throughly. These could
@@ -51,6 +53,8 @@
 
     Don't use "all" when applying tweaks, you install unsupported tweeks too;
     this is useful to see all tweaks you want to apply (e.g. with -List).
+
+    Must be used in conjunction with -Catagory.
 
 .PARAMETER DryRun
     Simulate running modules instead of actually running them.
@@ -84,49 +88,34 @@
 
     You should never use this in NORMAL usage. If you are developing a new
     Tweak that is unrelated to an Interface, you probably want -Unsigned.
+
+.EXAMPLE
+    C:\PS> .\tweak.ps1 -DryRun -Catagory telemetry -Classification unstable
+
+    Simulate running all unstable telemetry tweaks against the system.
+
+.EXAMPLE
+    C:\PS> .\tweak.ps1 -Catagory telemetry -Classification stable
     
-.EXAMPLE
-    C:\PS> .\tweak.ps1
-
-    Run all default tweaks against the system.
-
-.EXAMPLE
-    C:\PS> .\tweak.ps1 -DryRun
-
-    Simulate running all default tweaks against the system.
+    Run all stable telemetry tweaks against the system. **NOTE** this will
+    execute 'stable' modules only. Specify -Classification to run a specific
+    type.
 
 .EXAMPLE
-    C:\PS> .\tweak.ps1 -Catagory telemetry
-    
-    Run all telemetry tweaks against the system. **NOTE** this will execute
-    'stable' modules only. Specify -Classification to run a specific type.
+    C:\PS> .\tweak.ps1 -Tweak SomeTweek
+
+    Run only a specific tweek against the system. Note: Tweek will still
+    determine if it applies to your system.
 
 .EXAMPLE
-    c:\PS> .\tweak.ps1 -Catagory telemetry -DryRun
-
-    Simulate running all telemetry tweaks against the system.
-
-.EXAMPLE
-    C:\PS> .\tweak.ps1 -Unsigned -Tweak MyNewTweak
-
-    Run MyNewTweak module, do not verify file hashes.
-
-.EXAMPLE
-    C:\PS> .\tweak.ps1 -List
+    C:\PS> .\tweak.ps1 -List -Catagory all -Classification all
 
     Lists all modules.
-    
-    **NOTE**: you must specify both Classification and Catagory if you want a
-    specific list of modules back. See below.
 
 .EXAMPLE
     C:PS> .\tweak.ps1 -List -Classification stable -Catagory telemetry
 
     Lists all stable telemetry modules for tweek.
-
-    **NOTE**: You must specify both Classification and Catagory if you want a
-    specific list of modules back; otherwise all modules are returned due to
-    default options that are set.
 
 .LINK
     Project Source:
@@ -158,8 +147,8 @@
 [cmdletbinding()] 
 param(
   [switch]$Unsigned,
-  [string]$Catagory,
-  [string]$Classification,
+  [string]$Catagory = $none,
+  [string]$Classification = $none,
   [switch]$DryRun,
   [string]$Tweak = $none,
   [switch]$List,
@@ -172,6 +161,17 @@ if ($InstallGroupPolicy) {
   Write-Warning ('Group policy management toosl requested to be installed, Installing ...')
   Install-PackageProvider -Name NuGet -Force
   Install-Module PolicyFileEditor -Force
+  exit
+}
+
+$SwitchSelected = ($Unsigned.IsPresent -Or $DryRun.IsPresent -Or $List.IsPresent -Or $Testing.IsPresent -Or $NoGroupPolicy.IsPresent)
+$Filters = (![String]::IsNullOrWhiteSpace($Catagory) -And ![String]::IsNullOrWhiteSpace($Classification))
+if ([String]::IsNullOrWhiteSpace($Tweak)) {
+  if (($SwitchSelected -And !$Filters) -Or (!$SwitchSelected -And !$Filters)) {
+    Write-Host ('Please run the following one of the following commands for help or examples:')
+    Write-Host ("`n  Get-Help Tweek.ps1`n`n  Get-Help Tweek.ps1 -Examples`n") -ForegroundColor Green
+    exit
+  }
 }
 
 if (Get-Module -ListAvailable -Name PolicyFileEditor) {
