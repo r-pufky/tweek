@@ -200,8 +200,9 @@ try {
   # Always force re-import in case modules were updated in place.
   Import-Module .\FileManager.psm1 -Force
   $FileManager = NewFileManager
+  $FileManager.Configure($Testing, $VerbosePreference)
   if (!($Unsigned)) {
-    if ($FileManager.ValidateAndUpdate($VerbosePreference, $Testing)) {
+    if ($FileManager.ValidateAndUpdate()) {
       Write-Error ('Files were updated. Please RESTART powershell environment. See Help for details.')
       exit
     }
@@ -217,16 +218,21 @@ try {
     }
   }
 
+  Write-Verbose ('Configuring modules ...')
+  foreach ($Module in $Modules.GetEnumerator()) {
+    $Module.Value.Configure($DryRun, $Testing, $Classification, $Catagory, $Tweak, $WindowsVersion, $VerbosePreference)
+  }
+
   if ($List) {
     foreach ($Module in $Modules.GetEnumerator()) {
-      $Module.Value.TweekList($Classification, $Catagory, $WindowsVersion)
+      $Module.Value.TweekList()
     }
     exit
   }
 
   if ($Tweak) {
     if ($Modules.ContainsKey($Tweak)) {
-      $Modules[$Tweak].TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $Testing, $WindowsVersion)
+      $Modules[$Tweak].TweekExecute()
     } else {
       throw ($Tweak + ' is not a valid module; check valid modules using -List')
     }
@@ -235,7 +241,7 @@ try {
 
   Write-Output ('Applying [Catagory:' + $Catagory + ', Classification:' + $Classification + '] tweaks ...')
   foreach ($Module in $Modules.GetEnumerator()) {
-    $Module.Value.TweekExecute($DryRun, $Classification, $Catagory, $Tweak, $Testing, $WindowsVersion)
+    $Module.Value.TweekExecute()
   }
 } finally {
   $EnvironmentManager.RestorePolicy()

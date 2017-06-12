@@ -9,6 +9,23 @@
 class FileManager {
   [string] $URI_BASE = 'https://raw.githubusercontent.com/r-pufky/tweek/master'
   [string] $INTEGRITY_HASHES = 'integrity-hashes.sha256'
+  hidden [switch] $_Testing
+  hidden $_VerbosePreference
+
+  [void] Configure([switch]$Testing, $VerbosePreference) {
+    # Configures FileManager with options declared on command line.  
+    #
+    # As modules are dynamically loaded and instantiated, we need to manually
+    # setup command line options for FileManager. This simplifies method
+    # and calls.
+    #
+    # Args:
+    #   Testing: Switch containing whether local testing is enabled. 
+    #   VerbosePreference: Object containing verbosity option.
+    #
+    $this._Testing = $Testing
+    $this._VerbosePreference = $VerbosePreference
+  }
 
   hidden [boolean] VerifyFile([string]$ValidHash, $Target) {
     # Verifies file integrity by comparing file's current hash to verified hash.
@@ -56,16 +73,13 @@ class FileManager {
     return $File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.replace('\','/')}
   }
 
-  hidden [hashtable] GetIntegrityHashes([switch]$Testing) {
+  hidden [hashtable] GetIntegrityHashes() {
     # Returns integrity hashes for tweek.
     #
     # The hashfile is downloaded from the repository, loaded and returned.
     #
     # If local testing is set, then the hashfile is not updated before loading
     # and returning validation hashes.
-    #
-    # Args:
-    #   Testing: Switch containing whether local testing is enabled. 
     #
     # Returns
     #   Hashtable containing {[string] relative file location: [string] hash}
@@ -74,7 +88,7 @@ class FileManager {
     if (!(Test-Path $this.INTEGRITY_HASHES)) {
       New-Item $this.INTEGRITY_HASHES -Type file -Force
     }
-    if (!($Testing)) {
+    if (!($this._Testing)) {
       $this.UpdateFile((Get-Item $this.INTEGRITY_HASHES))
     } else {
       Write-Warning ('COMPROMISED (DANGEROUS FLAG USED): -Testing option used, not updating hashes from trusted source.')
@@ -86,7 +100,7 @@ class FileManager {
     return $Hashes
   }
 
-  [boolean] ValidateAndUpdate($VerbosePreference, [switch]$Testing) {
+  [boolean] ValidateAndUpdate() {
     # Validates and updates all files related to tweek.
     #
     # A validation hashfile is downloaded and a current file list is generated
@@ -100,10 +114,6 @@ class FileManager {
     # validation checks, and updates are not downloaded. This is only useful
     # to test hash updates.
     #
-    # Args:
-    #   VerbosePreference: Object containing verbosity option.
-    #   Testing: Switch containing whether local hash testing is enabled.
-    #
     # Raises:
     #   System.IO.FileLoadException for validation error.
     #
@@ -111,8 +121,9 @@ class FileManager {
     #   Boolean True if files were update, False otherwise. This only exists
     #   until -Force option bug in powershell is fixed.
     #
+    $VerbosePreference = $this._VerbosePreference
     $UpdatedFiles = $false
-    $Hashes = $this.GetIntegrityHashes($Testing)
+    $Hashes = $this.GetIntegrityHashes($this._Testing)
     foreach ($File in Get-ChildItem '.' -Include *.psm1, *.ps1 -Recurse) {
       $FileKey = ($File.FullName -split "tweek",2 | Select-Object -Last 1 | % {$_.split('\',2)} | Select-Object -Last 1)
       Write-Verbose ('Validating from filesystem: ' + $FileKey)
@@ -120,13 +131,13 @@ class FileManager {
         $Hashes.Remove($FileKey)
         continue
       }
-      if (!($Testing)) {
+      if (!($this._Testing)) {
         $this.UpdateFile($File)
         $UpdatedFiles = $true
       } else {
         Write-Warning ('COMPROMISED (Hash integrity): -Testing option selected, ' + $FileKey + ' failed verification, not downloading.')
       }
-      if (($this.VerifyFile($Hashes[$FileKey], $File.FullName)) -Or ($Testing)) {
+      if (($this.VerifyFile($Hashes[$FileKey], $File.FullName)) -Or ($this._Testing)) {
         $Hashes.Remove($FileKey)
         continue
       } else {
@@ -137,7 +148,7 @@ class FileManager {
     if ($Hashes.Count -ne 0) {
       foreach ($Hash in $Hashes.GetEnumerator()) {
         Write-Verbose ('Validating from hashtable: ' + $Hash.Name)
-        if (!($Testing)) {
+        if (!($this._Testing)) {
           $File = New-Item $Hash.Name -Type file -Force
           $this.UpdateFile($File)
           $UpdatedFiles = $true

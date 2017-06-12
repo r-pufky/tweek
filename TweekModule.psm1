@@ -93,6 +93,40 @@ class TweekModule {
   [TweekServiceInterface] $ServiceInterface = [TweekServiceInterface]::New()
   [TweekTaskSchedulerInterface] $ScheduledTask = [TweekTaskSchedulerInterface]::New()
   [TweekFileInterface] $File = [TweekFileInterface]::New()
+  #----------------------
+  hidden [switch] $_DryRun
+  hidden [switch] $_Testing
+  hidden [string] $_Classification
+  hidden [string] $_Catagory
+  hidden [string] $_Tweak
+  hidden [array] $_WindowsVersion
+  hidden $_VerbosePreference
+
+  [void] Configure([switch]$DryRun, [switch]$Testing, [string]$Classification, [string]$Catagory, [string]$Tweak, [array]$WindowsVersion, $VerbosePreference) {
+    # Configures tweek with options declared on the command line.
+    #
+    # As modules are dynamically loaded and instantiated, we need to manually
+    # setup command line options for tweek execution. This simplifies method
+    # and calls for the tweek.
+    #
+    # Args:
+    #   DryRun: Switch if DryRun option was selected on the command line.
+    #   Testing: Switch if Test hashes are being used. Disable execution.
+    #   Classifcation: String classification specified on the command line.
+    #   Catagory: String catagory specified on the command line.
+    #   Tweak: String specific tweak to run on the command line.
+    #   WindowsVersion: Array (String, Integer) containing current environment
+    #       execution environment.
+    #   VerbosePreference: Object containing verbosity option.
+    #
+    $this._DryRun = $DryRun
+    $this._Testing = $Testing
+    $this._Classification = $Classification
+    $this._Catagory = $Catagory
+    $this._Tweak = $Tweak
+    $this._WindowsVersion = $WindowsVersion
+    $this._VerbosePreference = $VerbosePreference
+  }
 
   hidden [void] GroupPolicyTweek() {
     # Apply tweaks using Group policy objects.
@@ -114,34 +148,25 @@ class TweekModule {
     # Apply tweaks using file manipulations.
   }
 
-  [void] TweekExecute([switch]$DryRun, [string]$Classification, [string]$Catagory, [string]$Tweak, [switch]$Testing, [array]$WindowsVersion) {
+  [void] TweekExecute() {
     # System calls this method to apply the Tweak to the system.
     #
     # This contains the logic to determine what action to execute.
     # If you need to change how a tweak is applied, modify _ApplyTweak()
     # in your subclass.
     #
-    # Args:
-    #   DryRun: Switch if DryRun option was selected on the command line.
-    #   Classifcation: String classification specified on the command line.
-    #   Catagory: String catagory specified on the command line.
-    #   Tweak: String specific tweak to run on the command line.
-    #   Testing: Switch if Test hashes are being used. Disable execution.
-    #   WindowsVersion: Array (String, Integer) containing current environment
-    #       execution environment.
-    #
-    if (($Tweak) -And ($Tweak -eq $this.Name())) {
-      $this.ExecuteOrDryRun($DryRun, $Testing, $WindowsVersion)
+    if (($this._Tweak) -And ($this._Tweak -eq $this.Name())) {
+      $this.ExecuteOrDryRun()
     } else {
-      if (($Catagory -eq 'all') -Or ($Catagory -eq $this.Catagory)) {
-        if ($Classification -eq $this.Classification) {
-          $this.ExecuteOrDryRun($DryRun, $Testing, $WindowsVersion)
+      if (($this._Catagory -eq 'all') -Or ($this._Catagory -eq $this.Catagory)) {
+        if ($this._Classification -eq $this.Classification) {
+          $this.ExecuteOrDryRun()
         } 
       }
     }
   }
 
-  [string] TweekList([string]$Classification, [string]$Catagory, [array]$WindowsVersion) {
+  [string] TweekList() {
     # System calls this to determine if module should list info.
     #
     #   Classifcation: String classification specified on the command line.
@@ -152,19 +177,13 @@ class TweekModule {
     #     tweaks are returned. It's only properly scoped when using -List AND
     #     both Catagory and Classification.
     #
-    # Args:
-    #   Classifcation: String classification specified on the command line.
-    #   Catagory: String catagory specified on the command line.
-    #   WindowsVersion: Array (String, Integer) containing current environment
-    #       execution environment.
-    #
     # Returns:
     #   String containing information for this tweek.
     #
-    if (($Catagory -eq 'all') -Or
-        ($Catagory -eq $this.Catagory) -Or
-        ($Classification -eq $this.Classification)) {
-      return $this.TweekInfo($WindowsVersion)
+    if (($this._Catagory -eq 'all') -Or
+        ($this._Catagory -eq $this.Catagory) -Or
+        ($this._Classification -eq $this.Classification)) {
+      return $this.TweekInfo()
     }
     return $null
   }
@@ -191,33 +210,26 @@ class TweekModule {
     return $this.GetType().FullName
   }
 
-  hidden [boolean] VerifyNonBlacklist([array]$WindowsVersion) {
+  hidden [boolean] VerifyNonBlacklist() {
     # Verify if this tweek should be executed based on Windows edition/version.
-    #
-    # Args:
-    #   WindowsVersion: Array containing windows edition and version from the
-    #       current environment.
     #
     # Returns:
     #   Boolean True if it can be executed, False otherwise.
     #
-    if ($this.EditionList -Contains $WindowsVersion[0]) {
-      Write-Host ($this.Name() + ' does not apply to Windows Edition: ' + $WindowsVersion[0] + ', skipping.')
+    $VerbosePreference = $this._VerbosePreference
+    if ($this.EditionList -Contains $this._WindowsVersion[0]) {
+      Write-Verbose ($this.Name() + ' does not apply to Windows Edition: ' + $this._WindowsVersion[0] + ', skipping.')
       return $false
     }
-    if ($this.VersionList -Contains $WindowsVersion[1]) {
-      Write-Host ($this.Name() + ' does not apply to Windows Version: ' + $WindowsVersion[1] + ', skipping.')
+    if ($this.VersionList -Contains $this._WindowsVersion[1]) {
+      Write-Verbose ($this.Name() + ' does not apply to Windows Version: ' + $this._WindowsVersion[1] + ', skipping.')
       return $false
     }
     return $true
   }
 
-  hidden [string] TweekInfo([array]$WindowsVersion) {
+  hidden [string] TweekInfo() {
     # Returns a string containing information for this tweek.
-    #
-    # Args:
-    #   WindowsVersion: Array containing windows edition and version from the
-    #       current environment.
     #
     return (
       "`n{0}`n{1}: {2}`nDetailed Description:`n {3}`nReferences:`n {4}`nIncompatible Editions:`n {5}`nIncompatible Version:`n {6}`nClassification: {7}`nCatagory: {8}`nValid Module: {9}`nApplies To Your System?: {10}" -f
@@ -231,7 +243,7 @@ class TweekModule {
       $this.Classification,
       $this.Catagory,
       $this.Validate(),
-      $this.VerifyNonBlacklist($WindowsVersion))
+      $this.VerifyNonBlacklist())
   }
 
   hidden [void] ApplyTweak() {
@@ -251,22 +263,16 @@ class TweekModule {
     $this.FileTweek()
   }
 
-  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing, [array]$WindowsVersion) {
+  hidden [void] ExecuteOrDryRun() {
     # Executes tweak or logs a dry run.
     #
-    # Args:
-    #   DryRun: Switch if DryRun option was selected on command line.
-    #   Testing: Switch if Test hashes are being used. Disable execution.
-    #   WindowsVersion: Array (String, Integer) containing current environment
-    #       execution environment.
-    #
-    if (!($DryRun)) {
+    if (!($this._DryRun)) {
       if (!($this.Validate())) {
         Write-Warning ($this.Name() + ': Is not a valid module, NOT executing. Contact the Module author ' + $this.Author)
-      } elseif ($Testing) {
+      } elseif ($this._Testing) {
         Write-Host ('IGNORE: ' + $this.Name() + ' -Testing option used and will not run.')
       } else {
-        if ($this.VerifyNonBlacklist($WindowsVersion)) {
+        if ($this.VerifyNonBlacklist()) {
           $this.ApplyTweak()
         }
       }

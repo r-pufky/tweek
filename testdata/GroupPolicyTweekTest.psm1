@@ -6,7 +6,7 @@ Using module '..\TweekModule.psm1'
 
 class GroupPolicyTweekTest : TweekModule {
 
-  [WindowsEdition] $Edition = [WindowsEdition]::pro
+  [WindowsEdition[]] $EditionList = @([WindowsEdition]::Microsoft_Windows_10_Pro)
   [string[]] $PolicyReferences = @('https://some.shit')
   [string] $Description = 'Tests group policy tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'

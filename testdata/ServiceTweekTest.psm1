@@ -5,7 +5,7 @@
 Using module '..\TweekModule.psm1'
 
 class ServiceTweekTest : TweekModule {
-  [WindowsEdition] $Edition = [WindowsEdition]::pro
+  [WindowsEdition[]] $EditionList = @([WindowsEdition]::Microsoft_Windows_10_Pro)
   [string[]] $PolicyReferences = @('github.com/r-pufky/tweek')
   [string] $Description = 'Tests service tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'
