@@ -9,7 +9,8 @@
 # 
 #   Get-CimInstance Win32_StartupCommand | select-object * | format-list
 #
-# 2) Location will point to the registry location, local file location or 'common startup'
+# 2) Location will point to the registry location, local file location or
+#    'common startup'
 # 3) If one of those, make tweek for registry or local file
 # 4) If 'common startup' it will reside in:
 #    C:\Users\Username\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
@@ -30,7 +31,8 @@ class TweekRegistryInterface {
     # - properly creates new subdirectories properly, non-destructively.
     #
     # Registry key breakdown:
-    # regedit: Computer\HKEY_CURRENT_USER\Software\Microsoft\OneDrive\OptinFolderRedirect = 0
+    # regedit: Computer\HKEY_CURRENT_USER\Software\Microsoft\OneDrive
+    #              OptinFolderRedirect = 0
     #   Path: HKCU:\Software\Microsoft\OneDrive
     #   Key: OptinFolderRedirect
     #   Type: DWORD
@@ -46,9 +48,11 @@ class TweekRegistryInterface {
     # Args:
     #   Path: String registry path. Shortcut usage is ok.
     #   Key: String registry key name.
-    #   Type: String registry key type. Valid types:
+    #   Type: String registry key type.
+    #       Valid types:
     #       STRING, EXPANDSTRING, BINARY, DWORD, MULTISTRING, QWORD, UNKNOWN
-    #       (reg_sz, reg_expand_sz, reg_binary, reg_dword, reg_multi_sz, reg_qword, reg_resource_list)
+    #       (reg_sz, reg_expand_sz, reg_binary, reg_dword,
+    #        reg_multi_sz, reg_qword, reg_resource_list)
     #   Value: Data to load into the key.
     #
     # Raises:

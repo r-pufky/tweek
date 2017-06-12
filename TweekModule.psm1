@@ -1,4 +1,4 @@
-﻿# Base TweekModule class for processing Windows 10 configuration tweaks
+﻿# Base TweekModule class for processing Windows 10 configuration tweaks.
 
 Using module .\interfaces\TweekGroupPolicyInterface.psm1
 Using module .\interfaces\TweekRegistryInterface.psm1
@@ -58,26 +58,33 @@ class TweekModule {
   # _GroupPolicyTweak() and _RegistryTweak() methods.
   #
   # Properties:
-  #   PolicyReferences: Array of Strings containing links to reference
-  #       material for specific tweak. One reference required.
+  #   PolicyReferences:
+  #       Array of Strings containing links to reference material for specific
+  #       tweak. One reference required.
   #   Description: String short description of tweak.
   #   LongDescription: String long description of tweak. Optional.
   #   Author: String author. Can be email, github ID, etc.
-  #   EditionList: Array of WindowsEdition enums specifying editions of windows
-  #       that this tweek *DOES NOT APPPLY* to.
-  #   VersionList: Array of WindowsVersion enums specifying versions of windows
-  #       that this tweek *DOES NOT APPLY* to.
-  #   Classification: TweakClassification enum specifying the general state
-  #       of the module. Default: stable.
-  #   Catagory: TweakCatagory enum specifying the type of tweak of the module.
+  #   EditionList:
+  #       Array of WindowsEdition enums specifying editions of windows that
+  #       this tweek *DOES NOT APPPLY* to.
+  #   VersionList:
+  #       Array of WindowsVersion enums specifying versions of windows that
+  #       this tweek *DOES NOT APPLY* to.
+  #   Classification:
+  #       TweakClassification enum specifying the general state of the module.
+  #       Default: stable.
+  #   Catagory:
+  #       TweakCatagory enum specifying the type of tweak of the module.
   #       Default: telemetry.
-  #   Registry: TweekRegistryInterface object to interact with windows
-  #       registry.
-  #   GroupPolicy: TweekGroupPolicyInterface object to interact with windows
-  #       Group Policy.
+  #   Registry:
+  #       TweekRegistryInterface object to interact with windows registry.
+  #   GroupPolicy:
+  #       TweekGroupPolicyInterface object to interact with windows Group
+  #       Policy.
   #   Service: TweekServiceInterface object to interact with windows services.
-  #   ScheduledTask: TweekTaskSchedulerInterface object to interact with
-  #       windows scheduled tasks.
+  #   ScheduledTask:
+  #       TweekTaskSchedulerInterface object to interact with windows scheduled
+  #       tasks.
   #   File: TweekFileInterface object to interact with files.
   #
   [string[]] $PolicyReferences
@@ -115,8 +122,9 @@ class TweekModule {
     #   Classifcation: String classification specified on the command line.
     #   Catagory: String catagory specified on the command line.
     #   Tweak: String specific tweak to run on the command line.
-    #   WindowsVersion: Array (String, Integer) containing current environment
-    #       execution environment.
+    #   WindowsVersion:
+    #       Array (String, Integer) containing current environment execution
+    #       environment.
     #   VerbosePreference: Object containing verbosity option.
     #
     $this._DryRun = $DryRun

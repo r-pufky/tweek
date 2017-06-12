@@ -5,7 +5,9 @@
 Using module '..\TweekModule.psm1'
 
 class FileTweekTest : TweekModule {
-  [WindowsEdition[]] $EditionList = @([WindowsEdition]::Microsoft_Windows_10_Pro)
+  [WindowsEdition[]] $EditionList = @(
+    [WindowsEdition]::Microsoft_Windows_10_Pro
+  )
   [string[]] $PolicyReferences = @('https://some.shit')
   [string] $Description = 'Tests file tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'

@@ -28,7 +28,7 @@ class FileManager {
   }
 
   hidden [boolean] VerifyFile([string]$ValidHash, $Target) {
-    # Verifies file integrity by comparing file's current hash to verified hash.
+    # Verifies file integrity by comparing file current hash to verified hash.
     #
     # Args:
     #   ValidHash: String known hash to compare with file hash.

@@ -1,20 +1,23 @@
 ﻿# Provides interface to Windows registry for Tweek Modules.
 #
 # To configure a new group policy Tweek:
-# 1) Ensure policy you want to set is in default state (e.g unmodified in gpedit.msc)
+# 1) Ensure policy you want to set is in default state (e.g unmodified in
+#    gpedit.msc)
 # 2) List all Group Policy objects currently set:
 #
 #   Machine Policies:
-#   Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -All
+#   Get-PolicyFileEntry -Path 
+#       $env:systemroot\system32\GroupPolicy\Machine\registry.pol -All
 #
 #   User Policies:
-#   Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\User\registry.pol -All
+#   Get-PolicyFileEntry -Path
+#       $env:systemroot\system32\GroupPolicy\User\registry.pol -All
 #
 #   Generally, local group policy is set at the Machine level.
 #
 # 3) Set your group policy tweek with gpedit.msc
 # 4) Re-run the above commands to see what changed or was added.
-# 5) Use that line for the changed/new data for configuration of group policy tweak.
+# 5) Use that line for changed/new data in configuration of group policy tweak.
 #
 
 class TweekGroupPolicyInterface {
@@ -24,16 +27,19 @@ class TweekGroupPolicyInterface {
     # Modifies or creates a given group policy key with a value.
     #
     # Args:
-    #   PolicyFile: String 'Machine' or 'User' local group policy file to modify.
+    #   PolicyFile: String 'Machine' or 'User' local group policy to modify.
     #   Key: String group policy key to modify.
     #   Name: String group policy Name to modify.
-    #   Type: String group policy key data type. Valid types:
+    #   Type: String group policy key data type.
+    #       Valid types:
     #       STRING, EXPANDSTRING, BINARY, DWORD, MULTISTRING, QWORD, UNKNOWN
-    #       (reg_sz, reg_expand_sz, reg_binary, reg_dword, reg_multi_sz, reg_qword, reg_resource_list)
+    #       (reg_sz, reg_expand_sz, reg_binary, reg_dword,
+    #        reg_multi_sz, reg_qword, reg_resource_list)
     #   Value: Data to load into the key name.
     #
     # Raises:
-    #   System.ArgumenOutOfRangeException if a correct PolicyFile is not set or wrong Type keyword.
+    #   System.ArgumenOutOfRangeException if a correct PolicyFile is not set or
+    #   wrong Type keyword.
     #
     if (($PolicyFile -ne 'Machine') -And ($PolicyFile -ne 'User')) {
       throw [System.ArgumentOutOfRangeException]::New("UpdateGroupPolicy requires PolicyFile to be 'Machine' or 'User', not: " + $PolicyFile)
@@ -56,7 +62,7 @@ class TweekGroupPolicyInterface {
     # Deletes a given group policy.
     # 
     # Args:
-    #   PolicyFile: String 'Machine' or 'User' local group policy file to modify.
+    #   PolicyFile: String 'Machine' or 'User' local group policy to modify.
     #   Key: String group policy key to modify.
     #   Name: String group policy Name to modify.
     #

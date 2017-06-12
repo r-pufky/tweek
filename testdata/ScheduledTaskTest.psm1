@@ -1,11 +1,13 @@
 ﻿# test module for scheduled tasks workings
 #
-# uses tests scheduled tasks locations (Data Integrity Scan for Crash Recovery).
+# uses tests scheduled tasks (Data Integrity Scan for Crash Recovery).
 
 Using module '..\TweekModule.psm1'
 
 class ScheduledTaskTest : TweekModule {
-  [WindowsEdition[]] $EditionList = @([WindowsEdition]::Microsoft_Windows_10_Pro)
+  [WindowsEdition[]] $EditionList = @(
+    [WindowsEdition]::Microsoft_Windows_10_Pro
+  )
   [string[]] $PolicyReferences = @('github.com/r-pufky/tweek')
   [string] $Description = 'Tests scheduled task tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'
