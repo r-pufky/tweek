@@ -60,12 +60,18 @@ class ManageExecutionEnvironment {
   [array] GetWindowsVersion() {
     # Returns the current Windows 10 release information from the environment.
     #
+    # Editions have spaces replaced with underscores for enum keying, and
+    # Versions have 'v' pre-pended for enum keying.
+    #
     # Returns:
-    #   Array containing ([string] Edition, [integer] Version).
+    #   Array containing ([string] Edition, [string] Version).
     #
     $Edition = Get-WmiObject -Class Win32_OperatingSystem | ForEach-Object -MemberName Caption
     $Version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").ReleaseId
     Write-Host ('Detected: ' + $Edition + '; Version: ' + $Version)
-    return @($Edition, [int]$Version)
+    $Edition = $Edition.replace(' ', '_')
+    $Version = 'v' + $Version
+    Write-Verbose ('Detected (converted): ' + $Edition + '; Version: ' + $Version)
+    return @($Edition, $Version)
   }
 }

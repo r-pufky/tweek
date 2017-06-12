@@ -6,32 +6,26 @@ Using module .\interfaces\TweekServiceInterface.psm1
 Using module .\interfaces\TweekTaskSchedulerInterface.psm1
 Using module .\interfaces\TweekFileInterface.psm1
 
-# Windows 10 editions based on:
+# Windows 10 edition key.
 # https://en.wikipedia.org/wiki/Windows_10_editions#Baseline_editions
-#
-# These help categorize specific tweaks for specific operating systems
-# e.g. can only be applied to a specific OS.
 enum WindowsEdition {
-  home
-  pro
-  enterprise
-  eudcation
-  pro_education
-  enterprise_ltsb
-  mobile_enterprise
-  china_government_edition
+  Microsoft_Windows_10_Home
+  Microsoft_Windows_10_Pro
+  Microsoft_Windows_10_Enterprise
+  Microsoft_Windows_10_Eudcation
+  Microsoft_Windows_10_Pro_Education
+  Microsoft_Windows_10_Enterprise_LTSB
+  Microsoft_Windows_10_Mobile_Enterprise
+  Microsoft_Windows_10_China_Government_Edition
 }
 
-# Windows 10 versions based on:
+# Windows 10 versions.
 # https://en.wikipedia.org/wiki/Windows_10_version_history
-#
-# These are the current numeric 'patch' versions of windows 10. These
-# determine the minimal patch level a specific tweak applies to.
 enum WindowsVersion {
-  version_1507 = 1507
-  version_1511 = 1511
-  version_1607 = 1607
-  version_1703 = 1703
+  v1507 = 1507
+  v1511 = 1511
+  v1607 = 1607
+  v1703 = 1703
 }
 
 # Tweak classifications pertaining to each tweak.
@@ -69,10 +63,10 @@ class TweekModule {
   #   Description: String short description of tweak.
   #   LongDescription: String long description of tweak. Optional.
   #   Author: String author. Can be email, github ID, etc.
-  #   Edition: WindowsEdition enum specifying the lowest Windows edition this
-  #       tweak applies to. Default: home.
-  #   Version: WindowsVersion enum specifying the lowest Windows version this
-  #       tweak applies to. Default: verison_1507.
+  #   EditionList: Array of WindowsEdition enums specifying editions of windows
+  #       that this tweek *DOES NOT APPPLY* to.
+  #   VersionList: Array of WindowsVersion enums specifying versions of windows
+  #       that this tweek *DOES NOT APPLY* to.
   #   Classification: TweakClassification enum specifying the general state
   #       of the module. Default: stable.
   #   Catagory: TweakCatagory enum specifying the type of tweak of the module.
@@ -90,8 +84,8 @@ class TweekModule {
   [string] $Description
   [string] $LongDescription
   [string] $Author
-  [WindowsEdition] $Edition = [WindowsEdition]::home
-  [WindowsVersion] $Version = [WindowsVersion]::version_1507
+  [WindowsEdition[]] $EditionList = @()
+  [WindowsVersion[]] $VersionList = @()
   [TweakClassification] $Classification = [TweakClassification]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
   [TweekRegistryInterface] $Registry = [TweekRegistryInterface]::New()
@@ -147,7 +141,7 @@ class TweekModule {
     }
   }
 
-  [string] TweekList([string]$Classification, [string]$Catagory) {
+  [string] TweekList([string]$Classification, [string]$Catagory, [array]$WindowsVersion) {
     # System calls this to determine if module should list info.
     #
     #   Classifcation: String classification specified on the command line.
@@ -158,13 +152,19 @@ class TweekModule {
     #     tweaks are returned. It's only properly scoped when using -List AND
     #     both Catagory and Classification.
     #
+    # Args:
+    #   Classifcation: String classification specified on the command line.
+    #   Catagory: String catagory specified on the command line.
+    #   WindowsVersion: Array (String, Integer) containing current environment
+    #       execution environment.
+    #
     # Returns:
     #   String containing information for this tweek.
     #
     if (($Catagory -eq 'all') -Or
         ($Catagory -eq $this.Catagory) -Or
         ($Classification -eq $this.Classification)) {
-      return $this.TweekInfo()
+      return $this.TweekInfo($WindowsVersion)
     }
     return $null
   }
@@ -191,20 +191,47 @@ class TweekModule {
     return $this.GetType().FullName
   }
 
-  hidden [string] TweekInfo() {
+  hidden [boolean] VerifyNonBlacklist([array]$WindowsVersion) {
+    # Verify if this tweek should be executed based on Windows edition/version.
+    #
+    # Args:
+    #   WindowsVersion: Array containing windows edition and version from the
+    #       current environment.
+    #
+    # Returns:
+    #   Boolean True if it can be executed, False otherwise.
+    #
+    if ($this.EditionList -Contains $WindowsVersion[0]) {
+      Write-Host ($this.Name() + ' does not apply to Windows Edition: ' + $WindowsVersion[0] + ', skipping.')
+      return $false
+    }
+    if ($this.VersionList -Contains $WindowsVersion[1]) {
+      Write-Host ($this.Name() + ' does not apply to Windows Version: ' + $WindowsVersion[1] + ', skipping.')
+      return $false
+    }
+    return $true
+  }
+
+  hidden [string] TweekInfo([array]$WindowsVersion) {
     # Returns a string containing information for this tweek.
+    #
+    # Args:
+    #   WindowsVersion: Array containing windows edition and version from the
+    #       current environment.
+    #
     return (
-      "`n{0}`n{1}: {2}`nDetailed Description:`n  {3}`nReferences:`n {4}`nEdition: {5}`nMinimum Version: {6}`nClassification: {7}`nCatagory: {8}`nValid Module: {9}" -f
+      "`n{0}`n{1}: {2}`nDetailed Description:`n {3}`nReferences:`n {4}`nIncompatible Editions:`n {5}`nIncompatible Version:`n {6}`nClassification: {7}`nCatagory: {8}`nValid Module: {9}`nApplies To Your System?: {10}" -f
       ('-' * 35),
       $this.Name(),
       $this.Description,
       $this.LongDescription,
-      ($this.PolicyReferences -join "`n  "),
-      $this.Edition,
-      $this.Version,
+      ($this.PolicyReferences -join "`n "),
+      ($this.EditionList -join "`n "),
+      ($this.VersionList -join "`n "),
       $this.Classification,
       $this.Catagory,
-      $this.Validate())
+      $this.Validate(),
+      $this.VerifyNonBlacklist($WindowsVersion))
   }
 
   hidden [void] ApplyTweak() {
@@ -239,7 +266,9 @@ class TweekModule {
       } elseif ($Testing) {
         Write-Host ('IGNORE: ' + $this.Name() + ' -Testing option used and will not run.')
       } else {
-        $this.ApplyTweak()
+        if ($this.VerifyNonBlacklist($WindowsVersion)) {
+          $this.ApplyTweak()
+        }
       }
     } else {
       Write-Host ('Dry Run: ' + $this.Name())

@@ -219,7 +219,7 @@ try {
 
   if ($List) {
     foreach ($Module in $Modules.GetEnumerator()) {
-      $Module.Value.TweekList($Classification, $Catagory)
+      $Module.Value.TweekList($Classification, $Catagory, $WindowsVersion)
     }
     exit
   }

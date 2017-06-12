@@ -3,7 +3,7 @@
 Using module '..\TweekModule.psm1'
 
 class NewTweek : TweekModule {
-  [WindowsEdition] $Edition = [WindowsEdition]::pro
+  [WindowsVersion[]] $VersionList = @([WindowsVersion]::v1703)
   [string[]] $PolicyReferences = @('https://some.shit',
                                    'https://some.other.shit')
   [string] $Description = 'This a new tweak that does things.'
