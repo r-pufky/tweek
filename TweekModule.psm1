@@ -32,9 +32,9 @@ enum WindowsVersion {
 enum TweakClassification {
   # stable tweaks are vetted and apply broadly.
   stable
-  # New tweaks are automatically classified as flakey. These are *not* run
+  # New tweaks are automatically classified as unstable. These are *not* run
   # by default
-  flakey
+  unstable
   # Optional tweaks applied to tweaks to specific user hardware or software
   # and should not be applied to a generic windows 10 install. These are
   # *not* run by default.
