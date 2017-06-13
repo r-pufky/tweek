@@ -1,10 +1,8 @@
-﻿# test module import and inheritence
-
-Using module '..\TweekModule.psm1'
+﻿Using module '..\TweekModule.psm1'
 
 class DiagTrack : TweekModule {
   [string[]] $PolicyReferences = @(
-    ('http://www.forbes.com/sites/gordonkelly/2015/11/24/windows-10-automatic-spying-begins-again/#5f0b888d2d97')
+    'http://www.forbes.com/sites/gordonkelly/2015/11/24/windows-10-automatic-spying-begins-again/#5f0b888d2d97'
   )
   [string] $Description = (
     'Disables user data collection/tracking and reporting to microsoft.'
