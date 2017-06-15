@@ -13,7 +13,7 @@
 class TweekTaskSchedulerInterface {
   $_VerbosePreference
 
-  [void] DisableTask([string]$Name) {
+  [void] Disable([string]$Name) {
     # Disables a given scheduled task.
     #
     # Args:
@@ -31,7 +31,7 @@ class TweekTaskSchedulerInterface {
     Get-ScheduledTask | where-object {($_.TaskName -eq $Name)} | Disable-ScheduledTask
   }
 
-  [void] EnableTask([string]$Name) {
+  [void] Enable([string]$Name) {
     # Enables a given scheduled task.
     #
     # Args:

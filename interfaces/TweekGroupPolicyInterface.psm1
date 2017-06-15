@@ -24,7 +24,7 @@ class TweekGroupPolicyInterface {
   [string[]]$AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
   $_VerbosePreference
 
-  [void] UpdateGroupPolicy([string]$PolicyFile, [string]$Key, [string]$Name, [string]$Type, $Data) {
+  [void] Update([string]$PolicyFile, [string]$Key, [string]$Name, [string]$Type, $Data) {
     # Modifies or creates a given group policy key with a value.
     #
     # Args:
@@ -59,7 +59,7 @@ class TweekGroupPolicyInterface {
     Set-PolicyFileEntry -Path $Policy -Key $Key -ValueName $Name -Type $Type -Data $Data
   }
 
-  [void] DeleteGroupPolicy([string]$PolicyFile, [string]$Key, [string]$Name) {
+  [void] Delete([string]$PolicyFile, [string]$Key, [string]$Name) {
     # Deletes a given group policy.
     # 
     # Args:

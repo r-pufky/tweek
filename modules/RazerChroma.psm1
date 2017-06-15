@@ -17,8 +17,8 @@ class RazerChroma : TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 
   hidden [void] ServiceTweek() {
-    $this.ServiceInterface.DisableService('Razer Chroma SDK Server')
-    $this.ServiceInterface.DisableService('Razer Chroma SDK Service')
+    $this.Service.Disable('Razer Chroma SDK Server')
+    $this.Service.Disable('Razer Chroma SDK Service')
   }
 }
 

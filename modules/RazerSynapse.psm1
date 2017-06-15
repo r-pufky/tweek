@@ -17,7 +17,7 @@ class RazerSynapse : TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 
   hidden [void] ServiceTweek() {
-    $this.ServiceInterface.DisableService('Razer Game Scanner Service')
+    $this.Service.Disable('Razer Game Scanner Service')
   }
 }
 

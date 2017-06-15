@@ -18,12 +18,12 @@ class FileTweekTest : TweekModule {
     $TestFile = '.\filetest.txt'
     $FirstData = 'this is a line of text for a file.'
     $SecondData = 'Another line'
-    $this.File.AppendToFile($TestFile, 'ASCII', $FirstData)
+    $this.File.Append($TestFile, 'ASCII', $FirstData)
     $this.File.AppendIfNew($TestFile, 'ASCII', $SecondData)
     $this.File.AppendIfNew($TestFile, 'ASCII', $SecondData)
     $this.File.FindAndReplace($TestFile, $FirstData, $SecondData)
-    $this.File.ClearFile($TestFile)
-    $this.File.DeleteFile($TestFile)
+    $this.File.Clear($TestFile)
+    $this.File.Delete($TestFile)
   }
 
   hidden [void] ExecuteOrDryRun() { $this.ApplyTweak() }

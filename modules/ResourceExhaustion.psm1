@@ -18,7 +18,7 @@ class ResourceExhaustion : TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::services
 
   hidden [void] GroupPolicyTweek() {
-    $this.GroupPolicy.UpdateGroupPolicy('Machine', 'SOFTWARE\Policies\Microsoft\Windows\WDI\{3af8b24a-c441-4fa4-8c5c-bed591bfa867}', 'ScenarioExecutionEnabled', 'DWORD', 0)
+    $this.GroupPolicy.Update('Machine', 'SOFTWARE\Policies\Microsoft\Windows\WDI\{3af8b24a-c441-4fa4-8c5c-bed591bfa867}', 'ScenarioExecutionEnabled', 'DWORD', 0)
   }
 }
 

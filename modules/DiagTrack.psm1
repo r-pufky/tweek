@@ -17,7 +17,7 @@ class DiagTrack : TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
 
   hidden [void] ServiceTweek() {
-    $this.ServiceInterface.DisableService('DiagTrack')
+    $this.Service.Disable('DiagTrack')
   }
 }
 

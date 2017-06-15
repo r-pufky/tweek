@@ -15,8 +15,8 @@ class ScheduledTaskTest : TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::services
 
   hidden [void] ServiceTweek() {
-    $this.ScheduledTask.DisableTask('Data Integrity Scan for Crash Recovery')
-    $this.ScheduledTask.EnableTask('Data Integrity Scan for Crash Recovery')
+    $this.ScheduledTask.Disable('Data Integrity Scan for Crash Recovery')
+    $this.ScheduledTask.Enable('Data Integrity Scan for Crash Recovery')
   }
 
   hidden [void] ExecuteOrDryRun() { $this.ApplyTweak() }

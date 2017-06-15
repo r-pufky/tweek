@@ -15,8 +15,8 @@ class ServiceTweekTest : TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::services
 
   hidden [void] ServiceTweek() {
-    $this.ServiceInterface.DisableService('BITS')
-    $this.ServiceInterface.EnableService('BITS')
+    $this.Service.Disable('BITS')
+    $this.Service.Enable('BITS')
   }
 
   hidden [void] ExecuteOrDryRun() { $this.ApplyTweak() }

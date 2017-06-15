@@ -17,11 +17,11 @@ class OneDrive : TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::services
 
   hidden [void] GroupPolicyTweek() {
-    $this.GroupPolicy.UpdateGroupPolicy('Machine', 'Software\Policies\Microsoft\Windows\OneDrive', 'DisableFileSyncNGSC', 'DWORD', 1)
+    $this.GroupPolicy.Update('Machine', 'Software\Policies\Microsoft\Windows\OneDrive', 'DisableFileSyncNGSC', 'DWORD', 1)
   }
 
   hidden [void] ScheduledTaskTweek() {
-    $this.ScheduledTask.DisableTask('OneDrive Standalone Update Task v2')
+    $this.ScheduledTask.Disable('OneDrive Standalone Update Task v2')
   }
 }
 

@@ -5,7 +5,7 @@ class TweekServiceInterface {
   [string[]]$AcceptedValues = @('BOOT', 'SYSTEM', 'AUTOMATIC', 'MANUAL', 'DISABLED')
   $_VerbosePreference
 
-  [void] DisableService([string]$Name) {
+  [void] Disable([string]$Name) {
     # Disables and stops a given service.
     #
     # Args:
@@ -23,7 +23,7 @@ class TweekServiceInterface {
     Stop-Service $Name
   }
 
-  [void] EnableService([string]$Name) {
+  [void] Enable([string]$Name) {
     # Enables and starts a given service.
     #
     # The service is set to start automatically.

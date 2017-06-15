@@ -5,7 +5,7 @@ class TweekFileInterface {
   [string[]]$EncodingValues = @('UNKNOWN', 'STRING', 'UNICODE', 'BIGENDIANUNICODE', 'UTF8', 'UTF7', 'UTF32', 'ASCII', 'DEFAULT', 'OEM', 'BIGENDIANUTF32', 'BYTE')
   $_VerbosePreference
 
-  [void] ClearFile([string]$Path) {
+  [void] Clear([string]$Path) {
     # Clears specified file of contents.
     #
     # Args:
@@ -15,7 +15,7 @@ class TweekFileInterface {
     Clear-Content $Path
   }
 
-  [void] DeleteFile([string]$Path) {
+  [void] Delete([string]$Path) {
     # Deletes a specified file.
     #
     # Args:
@@ -37,7 +37,7 @@ class TweekFileInterface {
     (Get-Content $Path).replace($Search, $Replace) | Set-Content $Path
   }
 
-  [void] AppendToFile([string]$Path, [string]$Encoding, [String]$Data) {
+  [void] Append([string]$Path, [string]$Encoding, [String]$Data) {
     # Appends given data to a file.
     #
     # This will *NOT* insert a newline by default.

@@ -98,7 +98,7 @@ class TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
   [TweekRegistryInterface] $Registry = [TweekRegistryInterface]::New()
   [TweekGroupPolicyInterface] $GroupPolicy = [TweekGroupPolicyInterface]::New()
-  [TweekServiceInterface] $ServiceInterface = [TweekServiceInterface]::New()
+  [TweekServiceInterface] $Service = [TweekServiceInterface]::New()
   [TweekTaskSchedulerInterface] $ScheduledTask = [TweekTaskSchedulerInterface]::New()
   [TweekFileInterface] $File = [TweekFileInterface]::New()
   #----------------------
@@ -137,7 +137,7 @@ class TweekModule {
     $this._VerbosePreference = $VerbosePreference
     $this.Registry._VerbosePreference = $VerbosePreference
     $this.GroupPolicy._VerbosePreference = $VerbosePreference
-    $this.ServiceInterface._VerbosePreference = $VerbosePreference
+    $this.Service._VerbosePreference = $VerbosePreference
     $this.ScheduledTask._VerbosePreference = $VerbosePreference
     $this.File._VerbosePreference = $VerbosePreference
   }

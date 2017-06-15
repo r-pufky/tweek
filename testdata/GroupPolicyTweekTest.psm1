@@ -16,8 +16,8 @@ class GroupPolicyTweekTest : TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 
   hidden [void] GroupPolicyTweek() {
-    $this.GroupPolicy.UpdateGroupPolicy('Machine', 'Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR', 'DWORD', 0)
-    $this.GroupPolicy.DeleteGroupPolicy('Machine', 'Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR')
+    $this.GroupPolicy.Update('Machine', 'Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR', 'DWORD', 0)
+    $this.GroupPolicy.Delete('Machine', 'Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR')
   }
 
   hidden [void] ExecuteOrDryRun() { $this.ApplyTweak() }
