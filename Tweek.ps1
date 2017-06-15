@@ -37,7 +37,7 @@
 
 .PARAMETER Catagory
     What type of tweaks to run.
-    Values:   firewall, services, filesystem, telemetry, system, all
+    Values:   firewall, services, filesystem, telemetry, system, store, all
 
     Must be used in conjunction with -Classification.
 
