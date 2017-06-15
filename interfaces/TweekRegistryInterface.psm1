@@ -20,7 +20,7 @@
 #   MULTISTRING (reg_multi_sz_: Array of Srings - @()
 #   UNKNOWN (reg_resource_list): - No value
 #
-# Startup Items (These are not regsitry only!):
+# Startup Items (These are not registry only!):
 # 1) Show all startup items for the current user (powershell):
 # 
 #   Get-CimInstance Win32_StartupCommand | select-object * | format-list
@@ -45,10 +45,10 @@ class TweekRegistryInterface {
     # Encodes given data into corresponding registry data type.
     #
     # Args:
-    #   Data: Any data from a regsitry value.
+    #   Data: Any data from a registry value.
     #
     # Returns:
-    #   String containing the regsitry data type.
+    #   String containing the registry data type.
     #
     if ($Data -Is [long]) { return 'QWORD' }
     if ($Data -Is [int]) { return 'DWORD' }
