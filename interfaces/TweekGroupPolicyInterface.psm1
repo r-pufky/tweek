@@ -22,6 +22,7 @@
 
 class TweekGroupPolicyInterface {
   [string[]]$AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
+  $_VerbosePreference
 
   [void] UpdateGroupPolicy([string]$PolicyFile, [string]$Key, [string]$Name, [string]$Type, $Data) {
     # Modifies or creates a given group policy key with a value.

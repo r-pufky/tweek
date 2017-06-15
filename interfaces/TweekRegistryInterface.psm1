@@ -40,6 +40,7 @@
 
 class TweekRegistryInterface {
   [string[]]$AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
+  $_VerbosePreference
 
   [string] EncodeType($Data) {
     # Encodes given data into corresponding registry data type.
@@ -156,13 +157,14 @@ class TweekRegistryInterface {
     #   Hashtable of Arrays containing Registry Keys at Path:
     #   {[string]PropertyName = @([string]PropertyType, Value)}
     #
+    $VerbosePreference = $this._VerbosePreference
     $RegistryKeys = @{}
     $Registry = Get-Item $Path -ErrorAction SilentlyContinue
     foreach ($Item in $Registry.Property) {
       $Properties = Get-ItemProperty $Path -Name $Item -ErrorAction SilentlyContinue
       $Value = ($Properties | Select -ExpandProperty $Item)
       $Type = $this.EncodeType($Value)
-      Write-Host ('    Enumerated: ' + $Path + '\' + $Item + ' [' + $Type + '] = ' + $Value)
+      Write-Verbose ('    Enumerated: ' + $Path + '\' + $Item + ' [' + $Type + '] = ' + $Value)
       $RegistryKeys.Add($Item, @($Type, $Value))
     }
     return $RegistryKeys

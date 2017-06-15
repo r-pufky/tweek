@@ -3,6 +3,7 @@
 
 class TweekFileInterface {
   [string[]]$EncodingValues = @('UNKNOWN', 'STRING', 'UNICODE', 'BIGENDIANUNICODE', 'UTF8', 'UTF7', 'UTF32', 'ASCII', 'DEFAULT', 'OEM', 'BIGENDIANUTF32', 'BYTE')
+  $_VerbosePreference
 
   [void] ClearFile([string]$Path) {
     # Clears specified file of contents.

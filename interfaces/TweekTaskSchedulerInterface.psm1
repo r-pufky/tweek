@@ -11,6 +11,7 @@
 #
 
 class TweekTaskSchedulerInterface {
+  $_VerbosePreference
 
   [void] DisableTask([string]$Name) {
     # Disables a given scheduled task.

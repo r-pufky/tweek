@@ -49,6 +49,7 @@ enum TweakCatagory {
   telemetry
   system
   hardware
+  store
 }
 
 class TweekModule {
@@ -134,6 +135,11 @@ class TweekModule {
     $this._Tweak = $Tweak
     $this._WindowsVersion = $WindowsVersion
     $this._VerbosePreference = $VerbosePreference
+    $this.Registry._VerbosePreference = $VerbosePreference
+    $this.GroupPolicy._VerbosePreference = $VerbosePreference
+    $this.ServiceInterface._VerbosePreference = $VerbosePreference
+    $this.ScheduledTask._VerbosePreference = $VerbosePreference
+    $this.File._VerbosePreference = $VerbosePreference
   }
 
   hidden [void] GroupPolicyTweek() {
