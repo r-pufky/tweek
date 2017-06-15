@@ -15,12 +15,13 @@ class RegistryTweekTest : TweekModule {
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 
   hidden [void] RegistryTweek() {
-    $this.Registry.UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version', 'DWORD', 1)
-    $this.Registry.UpdateRegistryKey('HKCU:\Software\TweekTest\Scripts', 'Test', 'STRING', 'testing string')
-    $this.Registry.DeleteRegistryKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version')
+    $this.Registry.UpdateKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version', 'DWORD', 1)
+    $this.Registry.UpdateKey('HKCU:\Software\TweekTest\Scripts', 'Test', 'STRING', 'testing string')
+    $this.Registry.DeleteKey('HKCU:\Software\TweekTest\Scripts\Others', 'Version')
+    $this.Registry.EnumerateKey('HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\SuggestedApps')
   }
 
-  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing) { $this.ApplyTweak() }
+  hidden [void] ExecuteOrDryRun() { $this.ApplyTweak() }
 }
 
 function Load() {

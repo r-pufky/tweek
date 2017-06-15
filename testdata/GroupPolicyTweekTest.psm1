@@ -20,7 +20,7 @@ class GroupPolicyTweekTest : TweekModule {
     $this.GroupPolicy.DeleteGroupPolicy('Machine', 'Software\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR')
   }
 
-  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing) { $this.ApplyTweak() }
+  hidden [void] ExecuteOrDryRun() { $this.ApplyTweak() }
 }
 
 function Load() {

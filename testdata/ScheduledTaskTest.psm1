@@ -19,7 +19,7 @@ class ScheduledTaskTest : TweekModule {
     $this.ScheduledTask.EnableTask('Data Integrity Scan for Crash Recovery')
   }
 
-  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing) { $this.ApplyTweak() }
+  hidden [void] ExecuteOrDryRun() { $this.ApplyTweak() }
 }
 
 function Load() {

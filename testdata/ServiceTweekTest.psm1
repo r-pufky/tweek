@@ -19,7 +19,7 @@ class ServiceTweekTest : TweekModule {
     $this.ServiceInterface.EnableService('BITS')
   }
 
-  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing) { $this.ApplyTweak() }
+  hidden [void] ExecuteOrDryRun() { $this.ApplyTweak() }
 }
 
 function Load() {

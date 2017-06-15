@@ -26,7 +26,7 @@ class FileTweekTest : TweekModule {
     $this.File.DeleteFile($TestFile)
   }
 
-  hidden [void] ExecuteOrDryRun([switch]$DryRun, [switch]$Testing) { $this.ApplyTweak() }
+  hidden [void] ExecuteOrDryRun() { $this.ApplyTweak() }
 }
 
 function Load() {
