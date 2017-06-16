@@ -65,6 +65,11 @@
 .PARAMETER List
     List all modules, their category and classification and what they do.
 
+.PARAMETER Manual
+    Show the manual steps required to apply Tweaks. This is used in conjunction
+    with the -List option to display manual tweaking steps for a module in
+    addition to the standard information listed for a Tweek.
+
 .PARAMETER NoGroupPolicy
     Do not attempt to use Group Policy modifications for tweeks.
 
@@ -117,6 +122,12 @@
 
     Lists all stable telemetry modules for tweek.
 
+.EXAMPLE
+    C:PS> .\tweak.ps1 -Classification stable -Catagory telemetry -List -Manual
+
+    Lists all stable telemetry modules for tweek, including manual steps to
+    enable those tweaks.
+
 .LINK
     Project Source:
       
@@ -154,7 +165,8 @@ param(
   [switch]$List,
   [switch]$NoGroupPolicy,
   [switch]$InstallGroupPolicy,
-  [switch]$Testing
+  [switch]$Testing,
+  [switch]$Manual
 )
 
 if ($InstallGroupPolicy) {
@@ -164,7 +176,7 @@ if ($InstallGroupPolicy) {
   exit
 }
 
-$SwitchSelected = ($Unsigned.IsPresent -Or $DryRun.IsPresent -Or $List.IsPresent -Or $Testing.IsPresent -Or $NoGroupPolicy.IsPresent)
+$SwitchSelected = ($Unsigned.IsPresent -Or $DryRun.IsPresent -Or $List.IsPresent -Or $Testing.IsPresent -Or $NoGroupPolicy.IsPresent -Or $Manual.IsPresent)
 $Filters = (![String]::IsNullOrWhiteSpace($Catagory) -And ![String]::IsNullOrWhiteSpace($Classification))
 if ([String]::IsNullOrWhiteSpace($Tweak)) {
   if (($SwitchSelected -And !$Filters) -Or (!$SwitchSelected -And !$Filters)) {
@@ -223,10 +235,17 @@ try {
 
   Write-Verbose ('Configuring modules ...')
   foreach ($Module in $Modules.GetEnumerator()) {
-    $Module.Value.Configure($DryRun, $Testing, $Classification, $Catagory, $Tweak, $WindowsVersion, $VerbosePreference)
+    $Module.Value.Configure($DryRun, $Testing, $Manual, $Classification, $Catagory, $Tweak, $WindowsVersion, $VerbosePreference)
   }
 
   if ($List) {
+    if ($Tweak) {
+      if ($Modules.ContainsKey($Tweak)) {
+        $Modules[$Tweak].TweekInfo()
+      } else {
+        Write-Error ('Specified module does not exist: ' + $Tweak + '; check valid modules using -List')
+      }
+    }
     foreach ($Module in $Modules.GetEnumerator()) {
       $Module.Value.TweekList()
     }
@@ -237,7 +256,7 @@ try {
     if ($Modules.ContainsKey($Tweak)) {
       $Modules[$Tweak].TweekExecute()
     } else {
-      throw ($Tweak + ' is not a valid module; check valid modules using -List')
+      Write-Error ('Specified modules does not exist: ' + $Tweak + '; check valid modules using -List')
     }
     exit
   }

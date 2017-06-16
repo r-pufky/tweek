@@ -63,6 +63,7 @@ class TweekModule {
   #       Array of Strings containing links to reference material for specific
   #       tweak. One reference required.
   #   Description: String short description of tweak.
+  #   ManualDescription: String manual description of tweak. Markdown format.
   #   LongDescription: String long description of tweak. Optional.
   #   Author: String author. Can be email, github ID, etc.
   #   EditionList:
@@ -91,6 +92,7 @@ class TweekModule {
   [string[]] $PolicyReferences
   [string] $Description
   [string] $LongDescription
+  [string] $ManualDescription
   [string] $Author
   [WindowsEdition[]] $EditionList = @()
   [WindowsVersion[]] $VersionList = @()
@@ -104,13 +106,14 @@ class TweekModule {
   #----------------------
   hidden [switch] $_DryRun
   hidden [switch] $_Testing
+  hidden [switch] $_Manual
   hidden [string] $_Classification
   hidden [string] $_Catagory
   hidden [string] $_Tweak
   hidden [array] $_WindowsVersion
   hidden $_VerbosePreference
 
-  [void] Configure([switch]$DryRun, [switch]$Testing, [string]$Classification, [string]$Catagory, [string]$Tweak, [array]$WindowsVersion, $VerbosePreference) {
+  [void] Configure([switch]$DryRun, [switch]$Testing, [switch]$Manual, [string]$Classification, [string]$Catagory, [string]$Tweak, [array]$WindowsVersion, $VerbosePreference) {
     # Configures tweek with options declared on the command line.
     #
     # As modules are dynamically loaded and instantiated, we need to manually
@@ -120,6 +123,7 @@ class TweekModule {
     # Args:
     #   DryRun: Switch if DryRun option was selected on the command line.
     #   Testing: Switch if Test hashes are being used. Disable execution.
+    #   Manual: Switch if manual tweek commands should be displayed as well.
     #   Classifcation: String classification specified on the command line.
     #   Catagory: String catagory specified on the command line.
     #   Tweak: String specific tweak to run on the command line.
@@ -130,6 +134,7 @@ class TweekModule {
     #
     $this._DryRun = $DryRun
     $this._Testing = $Testing
+    $this._Manual = $Manual
     $this._Classification = $Classification
     $this._Catagory = $Catagory
     $this._Tweak = $Tweak
@@ -237,9 +242,18 @@ class TweekModule {
     return $true
   }
 
-  hidden [string] TweekInfo() {
+  [string] TweekInfo() {
     # Returns a string containing information for this tweek.
     #
+    if ($this._Manual) {
+      return (
+        "`n{0}`n{1}: {2}`nDetailed Description:`n {3}`nManual Instructions (run as admin):`n{4}" -f
+        ('-' * 35),
+        $this.Name(),
+        $this.Description,
+        $this.LongDescription,
+        $this.ManualDescription)
+    }
     return (
       "`n{0}`n{1}: {2}`nDetailed Description:`n {3}`nReferences:`n {4}`nIncompatible Editions:`n {5}`nIncompatible Version:`n {6}`nClassification: {7}`nCatagory: {8}`nValid Module: {9}`nApplies To Your System?: {10}" -f
       ('-' * 35),

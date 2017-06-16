@@ -13,6 +13,13 @@ class ResourceExhaustion : TweekModule {
     'lead to games closing automatically while playing them or applications ' +
     'closing during use; with potential data loss.'
   )
+  [string] $ManualDescription = (
+    "*  win + r > gpedit.msc`n" +
+    "   *  Key: Computer Configuration > Administrative Templates > System " +
+    "> Troubleshooting and Diagnostics > " +
+    "Windows Resource Exhaustion Detection and Resolution`n" +
+    "   * Policy: Configure Scenario Execution Level = Disabled"
+  )
   [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClassification] $Classification = [TweakClassification]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::services

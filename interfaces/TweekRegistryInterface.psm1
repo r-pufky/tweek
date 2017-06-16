@@ -33,10 +33,6 @@
 #    C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp
 #    http://www.thewindowsclub.com/startup-folder-in-windows-8
 #
-#
-#
-#
-#
 
 class TweekRegistryInterface {
   [string[]]$AcceptedValues = @('STRING', 'EXPANDSTRING', 'BINARY', 'DWORD', 'MULTISTRING', 'QWORD', 'UNKNOWN')
@@ -119,14 +115,7 @@ class TweekRegistryInterface {
 
   [void] DeleteKey([string]$Path, [string]$Key) {
     # Deletes a given registry key.
-    #   
-    # Registry key shortcuts:
-    #    HKLM: HKEY_LOCAL_MACHINE
-    #    HKCR: HKEY_CLASSES_ROOT
-    #    HKCU: HKEY_CURRENT_USER
-    #    HKCC: HKEY_CURRENT_CONFIG
-    #    HKU: HKEY_USERS
-    #
+    # 
     # Args:
     #   Path: String registry path. Shortcut usage is ok.
     #   Key: String registry key name.

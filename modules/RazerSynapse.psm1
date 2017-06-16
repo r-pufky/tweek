@@ -12,6 +12,12 @@ class RazerSynapse : TweekModule {
     "scans your drive for installed games. There's no benefit to this, as " +
     'multiple other gaming platforms and drivers already scan your games.'
   )
+  [string] $ManualDescription = (
+    "*  win + r > services.msc`n" +
+    "   *  Select 'Razer Game Scanner Service'`n" +
+    "      *  right-click > stop`n" +
+    "      *  right-click > properties > disable`n"
+  )
   [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClassification] $Classification = [TweakClassification]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware

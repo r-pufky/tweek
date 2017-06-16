@@ -14,6 +14,15 @@ class SilentAppInstalls : TweekModule {
     'release. This will disable the silent installation of suggested apps ' +
     'and remove currently suggested apps.'
   )
+  [string] $ManualDescription = (
+    "*  win + r > regedit`n" +
+    "   *  Key: HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\" +
+    "ContentDeliveryManager`n" +
+    "      *  DWORD: SilentInstalledAppsEnabled = 0`n" +
+    "   *  Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\" +
+    "ContentDeliveryManager\SuggestedApps`n" +
+    "      *  DWORD: (all suggested apps listed) = 0"
+  )
   [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClassification] $Classification = [TweakClassification]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::store

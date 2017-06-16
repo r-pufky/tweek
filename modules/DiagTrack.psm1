@@ -12,6 +12,12 @@ class DiagTrack : TweekModule {
     'collects user and usage data on the machine, and reports it back to ' +
     'microsoft. There is no benefit to the user running this service.'
   )
+  [string] $ManualDescription = (
+    "*  win + r > services.msc`n" +
+    "   *  Select 'Connected User Experiences and Telemetry (DiagTrack)'`n" +
+    "      *  right-click > stop`n" +
+    "      *  right-click > properties > disable`n"
+  )
   [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClassification] $Classification = [TweakClassification]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry

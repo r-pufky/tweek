@@ -12,6 +12,15 @@ class OneDrive : TweekModule {
     'OneDrive creates a taskbar icon, and runs in the background, as well ' +
     'as syncing files to Microsoft Cloud.'
   )
+  [string] $ManualDescription = (
+    "*  win + r > gpedit.msc`n" +
+    "   *  Key: Computer Configuration > Administrative Templates > " +
+    "Windows Components > OneDrive`n" +
+    "   *  Policy: Prevent the usage of OneDrive for file storage = " +
+    "Enabled`n" +
+    "*  start > Task Scheduler > Task Scheduler Library`n" +
+    "   *  Key: OneDrive Standalone Update Task v2 = Disabled`n"
+  )
   [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClassification] $Classification = [TweakClassification]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::services
