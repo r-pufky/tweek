@@ -22,7 +22,7 @@ class OneDrive : TweekModule {
     "   *  Key: OneDrive Standalone Update Task v2 = Disabled`n"
   )
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::stable
+  [TweakClass] $Class = [TweakClass]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::services
 
   hidden [void] GroupPolicyTweek() {

@@ -11,7 +11,7 @@ class ScheduledTaskTest : TweekModule {
   [string[]] $PolicyReferences = @('github.com/r-pufky/tweek')
   [string] $Description = 'Tests scheduled task tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::optional
+  [TweakClass] $Class = [TweakClass]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::services
 
   hidden [void] ServiceTweek() {

@@ -39,9 +39,9 @@
     What type of tweaks to run.
     Values:   firewall, services, filesystem, telemetry, system, store, all
 
-    Must be used in conjunction with -Classification.
+    Must be used in conjunction with -Class.
 
-.PARAMETER Classification
+.PARAMETER Class
     What class of tweaks should be applied.
     Values: stable, unstable, optional, all
 
@@ -63,7 +63,7 @@
     Run only a single Tweak module. This is specified via the Class/filename.
 
 .PARAMETER List
-    List all modules, their category and classification and what they do.
+    List all modules, their category and Class and what they do.
 
 .PARAMETER Manual
     Show the manual steps required to apply Tweaks. This is used in conjunction
@@ -95,35 +95,35 @@
     Tweak that is unrelated to an Interface, you probably want -Unsigned.
 
 .EXAMPLE
-    C:\PS> .\tweak.ps1 -DryRun -Catagory telemetry -Classification unstable
+    C:\PS> .\Tweek.ps1 -DryRun -Catagory telemetry -Class unstable
 
     Simulate running all unstable telemetry tweaks against the system.
 
 .EXAMPLE
-    C:\PS> .\tweak.ps1 -Catagory telemetry -Classification stable
+    C:\PS> .\Tweek.ps1 -Catagory telemetry -Class stable
     
     Run all stable telemetry tweaks against the system. **NOTE** this will
-    execute 'stable' modules only. Specify -Classification to run a specific
+    execute 'stable' modules only. Specify -Class to run a specific
     type.
 
 .EXAMPLE
-    C:\PS> .\tweak.ps1 -Tweak SomeTweek
+    C:\PS> .\Tweek.ps1 -Tweak SomeTweek
 
     Run only a specific tweek against the system. Note: Tweek will still
     determine if it applies to your system.
 
 .EXAMPLE
-    C:\PS> .\tweak.ps1 -List -Catagory all -Classification all
+    C:\PS> .\Tweek.ps1 -List -Catagory all -Class all
 
     Lists all modules.
 
 .EXAMPLE
-    C:PS> .\tweak.ps1 -List -Classification stable -Catagory telemetry
+    C:PS> .\Tweek.ps1 -List -Class stable -Catagory telemetry
 
     Lists all stable telemetry modules for tweek.
 
 .EXAMPLE
-    C:PS> .\tweak.ps1 -Classification stable -Catagory telemetry -List -Manual
+    C:PS> .\Tweek.ps1 -Class stable -Catagory telemetry -List -Manual
 
     Lists all stable telemetry modules for tweek, including manual steps to
     enable those tweaks.
@@ -159,7 +159,7 @@
 param(
   [switch]$Unsigned,
   [string]$Catagory = $none,
-  [string]$Classification = $none,
+  [string]$Class = $none,
   [switch]$DryRun,
   [string]$Tweak = $none,
   [switch]$List,
@@ -177,7 +177,7 @@ if ($InstallGroupPolicy) {
 }
 
 $SwitchSelected = ($Unsigned.IsPresent -Or $DryRun.IsPresent -Or $List.IsPresent -Or $Testing.IsPresent -Or $NoGroupPolicy.IsPresent -Or $Manual.IsPresent)
-$Filters = (![String]::IsNullOrWhiteSpace($Catagory) -And ![String]::IsNullOrWhiteSpace($Classification))
+$Filters = (![String]::IsNullOrWhiteSpace($Catagory) -And ![String]::IsNullOrWhiteSpace($Class))
 if ([String]::IsNullOrWhiteSpace($Tweak)) {
   if (($SwitchSelected -And !$Filters) -Or (!$SwitchSelected -And !$Filters)) {
     Write-Host ('Please run the following one of the following commands for help or examples:')
@@ -235,7 +235,7 @@ try {
 
   Write-Verbose ('Configuring modules ...')
   foreach ($Module in $Modules.GetEnumerator()) {
-    $Module.Value.Configure($DryRun, $Testing, $Manual, $Classification, $Catagory, $Tweak, $WindowsVersion, $VerbosePreference)
+    $Module.Value.Configure($DryRun, $Testing, $Manual, $Class, $Catagory, $Tweak, $WindowsVersion, $VerbosePreference)
   }
 
   if ($List) {
@@ -245,9 +245,10 @@ try {
       } else {
         Write-Error ('Specified module does not exist: ' + $Tweak + '; check valid modules using -List')
       }
-    }
-    foreach ($Module in $Modules.GetEnumerator()) {
-      $Module.Value.TweekList()
+    } else {
+      foreach ($Module in $Modules.GetEnumerator()) {
+        $Module.Value.TweekList()
+      }
     }
     exit
   }
@@ -261,7 +262,7 @@ try {
     exit
   }
 
-  Write-Output ('Applying [Catagory:' + $Catagory + ', Classification:' + $Classification + '] tweaks ...')
+  Write-Output ('Applying [Catagory:' + $Catagory + ', Class:' + $Class + '] tweaks ...')
   foreach ($Module in $Modules.GetEnumerator()) {
     $Module.Value.TweekExecute()
   }

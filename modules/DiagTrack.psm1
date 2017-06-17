@@ -19,7 +19,7 @@ class DiagTrack : TweekModule {
     "      *  right-click > properties > disable`n"
   )
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::stable
+  [TweakClass] $Class = [TweakClass]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
 
   hidden [void] ServiceTweek() {

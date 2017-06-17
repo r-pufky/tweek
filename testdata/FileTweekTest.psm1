@@ -11,7 +11,7 @@ class FileTweekTest : TweekModule {
   [string[]] $PolicyReferences = @('https://some.shit')
   [string] $Description = 'Tests file tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::optional
+  [TweakClass] $Class = [TweakClass]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::filesystem
 
   hidden [void] FileTweek() {

@@ -24,7 +24,7 @@ class SilentAppInstalls : TweekModule {
     "      *  DWORD: (all suggested apps listed) = 0"
   )
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::stable
+  [TweakClass] $Class = [TweakClass]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::store
 
   hidden [void] RegistryTweek() {

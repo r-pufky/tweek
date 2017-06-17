@@ -29,7 +29,7 @@ enum WindowsVersion {
 }
 
 # Tweak classifications pertaining to each tweak.
-enum TweakClassification {
+enum TweakClass {
   # stable tweaks are vetted and apply broadly.
   stable
   # New tweaks are automatically classified as unstable. These are *not* run
@@ -72,8 +72,8 @@ class TweekModule {
   #   VersionList:
   #       Array of WindowsVersion enums specifying versions of windows that
   #       this tweek *DOES NOT APPLY* to.
-  #   Classification:
-  #       TweakClassification enum specifying the general state of the module.
+  #   Class:
+  #       TweakClass enum specifying the general state of the module.
   #       Default: stable.
   #   Catagory:
   #       TweakCatagory enum specifying the type of tweak of the module.
@@ -96,7 +96,7 @@ class TweekModule {
   [string] $Author
   [WindowsEdition[]] $EditionList = @()
   [WindowsVersion[]] $VersionList = @()
-  [TweakClassification] $Classification = [TweakClassification]::stable
+  [TweakClass] $Class = [TweakClass]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
   [TweekRegistryInterface] $Registry = [TweekRegistryInterface]::New()
   [TweekGroupPolicyInterface] $GroupPolicy = [TweekGroupPolicyInterface]::New()
@@ -107,13 +107,13 @@ class TweekModule {
   hidden [switch] $_DryRun
   hidden [switch] $_Testing
   hidden [switch] $_Manual
-  hidden [string] $_Classification
+  hidden [string] $_Class
   hidden [string] $_Catagory
   hidden [string] $_Tweak
   hidden [array] $_WindowsVersion
   hidden $_VerbosePreference
 
-  [void] Configure([switch]$DryRun, [switch]$Testing, [switch]$Manual, [string]$Classification, [string]$Catagory, [string]$Tweak, [array]$WindowsVersion, $VerbosePreference) {
+  [void] Configure([switch]$DryRun, [switch]$Testing, [switch]$Manual, [string]$Class, [string]$Catagory, [string]$Tweak, [array]$WindowsVersion, $VerbosePreference) {
     # Configures tweek with options declared on the command line.
     #
     # As modules are dynamically loaded and instantiated, we need to manually
@@ -124,7 +124,7 @@ class TweekModule {
     #   DryRun: Switch if DryRun option was selected on the command line.
     #   Testing: Switch if Test hashes are being used. Disable execution.
     #   Manual: Switch if manual tweek commands should be displayed as well.
-    #   Classifcation: String classification specified on the command line.
+    #   Classifcation: String Class specified on the command line.
     #   Catagory: String catagory specified on the command line.
     #   Tweak: String specific tweak to run on the command line.
     #   WindowsVersion:
@@ -135,7 +135,7 @@ class TweekModule {
     $this._DryRun = $DryRun
     $this._Testing = $Testing
     $this._Manual = $Manual
-    $this._Classification = $Classification
+    $this._Class = $Class
     $this._Catagory = $Catagory
     $this._Tweak = $Tweak
     $this._WindowsVersion = $WindowsVersion
@@ -178,7 +178,7 @@ class TweekModule {
       $this.ExecuteOrDryRun()
     } else {
       if (($this._Catagory -eq 'all') -Or ($this._Catagory -eq $this.Catagory)) {
-        if (($this._Classification -eq 'all') -Or ($this._Classification -eq $this.Classification)) {
+        if (($this._Class -eq 'all') -Or ($this._Class -eq $this.Class)) {
           $this.ExecuteOrDryRun()
         } 
       }
@@ -188,14 +188,14 @@ class TweekModule {
   [string] TweekList() {
     # System calls this to determine if module should list info.
     #
-    #   Classifcation: String classification specified on the command line.
+    #   Classifcation: String Class specified on the command line.
     #   Catagory: String catagory specified on the command line.
     #
     # Returns:
     #   String containing information for this tweek.
     #
     if (($this._Catagory -eq 'all') -Or ($this._Catagory -eq $this.Catagory)) {
-      if (($this._Classification -eq 'all') -Or ($this._Classification -eq $this.Classification)) {
+      if (($this._Class -eq 'all') -Or ($this._Class -eq $this.Class)) {
         return $this.TweekInfo()
       }
     }
@@ -255,7 +255,7 @@ class TweekModule {
         $this.ManualDescription)
     }
     return (
-      "`n{0}`n{1}: {2}`nDetailed Description:`n {3}`nReferences:`n {4}`nIncompatible Editions:`n {5}`nIncompatible Version:`n {6}`nClassification: {7}`nCatagory: {8}`nValid Module: {9}`nApplies To Your System?: {10}" -f
+      "`n{0}`n{1}: {2}`nDetailed Description:`n {3}`nReferences:`n {4}`nIncompatible Editions:`n {5}`nIncompatible Version:`n {6}`nClass: {7}`nCatagory: {8}`nValid Module: {9}`nApplies To Your System?: {10}" -f
       ('-' * 35),
       $this.Name(),
       $this.Description,
@@ -263,7 +263,7 @@ class TweekModule {
       ($this.PolicyReferences -join "`n "),
       ($this.EditionList -join "`n "),
       ($this.VersionList -join "`n "),
-      $this.Classification,
+      $this.Class,
       $this.Catagory,
       $this.Validate(),
       $this.VerifyNonBlacklist())

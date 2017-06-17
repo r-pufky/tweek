@@ -21,7 +21,7 @@ class ResourceExhaustion : TweekModule {
     "   * Policy: Configure Scenario Execution Level = Disabled"
   )
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::stable
+  [TweakClass] $Class = [TweakClass]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::services
 
   hidden [void] GroupPolicyTweek() {

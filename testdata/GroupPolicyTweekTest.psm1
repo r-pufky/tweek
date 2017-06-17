@@ -12,7 +12,7 @@ class GroupPolicyTweekTest : TweekModule {
   [string[]] $PolicyReferences = @('https://some.shit')
   [string] $Description = 'Tests group policy tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::optional
+  [TweakClass] $Class = [TweakClass]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 
   hidden [void] GroupPolicyTweek() {

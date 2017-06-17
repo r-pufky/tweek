@@ -11,7 +11,7 @@ class RegistryTweekTest : TweekModule {
   [string[]] $PolicyReferences = @('https://some.shit')
   [string] $Description = 'Tests registry tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::optional
+  [TweakClass] $Class = [TweakClass]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 
   hidden [void] RegistryTweek() {

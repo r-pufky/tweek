@@ -22,7 +22,7 @@ class RazerChroma : TweekModule {
     "      *  right-click > properties > disable`n"
   )
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::optional
+  [TweakClass] $Class = [TweakClass]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::hardware
 
   hidden [void] ServiceTweek() {

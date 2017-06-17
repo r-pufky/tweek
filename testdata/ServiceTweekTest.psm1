@@ -11,7 +11,7 @@ class ServiceTweekTest : TweekModule {
   [string[]] $PolicyReferences = @('github.com/r-pufky/tweek')
   [string] $Description = 'Tests service tweaks.'
   [string] $Author = 'github.com/r-pufky/tweek'
-  [TweakClassification] $Classification = [TweakClassification]::optional
+  [TweakClass] $Class = [TweakClass]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::services
 
   hidden [void] ServiceTweek() {
