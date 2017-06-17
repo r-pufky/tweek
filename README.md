@@ -21,3 +21,5 @@ Install-Module PolicyFileEditor -Force
 PolicyFileEditor (Module): https://www.powershellgallery.com/packages/PolicyFileEditor/2.0.2
 
 NuGet (Module): https://www.powershellgallery.com/packages/NuGet/1.3.3
+
+[Developer Notes Here](DEVELOPER.md)
