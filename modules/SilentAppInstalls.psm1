@@ -18,10 +18,7 @@ class SilentAppInstalls : TweekModule {
     "*  win + r > regedit`n" +
     "   *  Key: HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\" +
     "ContentDeliveryManager`n" +
-    "      *  DWORD: SilentInstalledAppsEnabled = 0`n" +
-    "   *  Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\" +
-    "ContentDeliveryManager\SuggestedApps`n" +
-    "      *  DWORD: (all suggested apps listed) = 0"
+    "      *  DWORD: SilentInstalledAppsEnabled = 0`n"
   )
   [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClass] $Class = [TweakClass]::stable
@@ -29,10 +26,6 @@ class SilentAppInstalls : TweekModule {
 
   hidden [void] RegistryTweek() {
     $this.Registry.UpdateKey('HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', 'SilentInstalledAppsEnabled', 'DWORD', 0)
-    $SuggestedApps = $this.Registry.EnumerateKey('HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\SuggestedApps')
-    foreach ($App in $SuggestedApps.GetEnumerator()) {
-      $this.Registry.UpdateKey('HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\SuggestedApps', $App.Name, $App.Value[0], 0)
-    }
   }
 }
 

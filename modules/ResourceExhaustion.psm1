@@ -1,6 +1,7 @@
 ﻿Using module '..\TweekModule.psm1'
 
 class ResourceExhaustion : TweekModule {
+  [WindowsEdition[]] $EditionList = @([WindowsEdition]::Microsoft_Windows_10_Home)
   [string[]] $PolicyReferences = @(
     'https://www.autoitscript.com/forum/topic/177749-stopping-windows-10-from-auto-closing-programs-to-free-up-ram/'
   )
