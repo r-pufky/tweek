@@ -137,11 +137,11 @@ function Load() {
 
 ```powershell
   [WindowsEdition[]] $EditionList = @(
-    WindowsEdition::Microsoft_Windows_10_Mobile_Enterprise,
-    WindowsEdition::Microsoft_Windows_10_Home
+    [WindowsEdition]::Microsoft_Windows_10_Mobile_Enterprise,
+    [WindowsEdition]::Microsoft_Windows_10_Home
   )
   [WindowsVersion[]] $VersionList = @(
-    WindowsVersion::v1607
+    [WindowsVersion]::v1607
   )
   [TweakClass] $Class = [TweakClass]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::services
