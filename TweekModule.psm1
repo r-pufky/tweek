@@ -78,6 +78,10 @@ class TweekModule {
   #   Catagory:
   #       TweakCatagory enum specifying the type of tweak of the module.
   #       Default: telemetry.
+  #   SystemBreaking:
+  #       Boolean True if this tweek can potentially break the system, and
+  #       requirements manual user acknowledge before execution.
+  #       Default: False.
   #   Registry:
   #       TweekRegistryInterface object to interact with windows registry.
   #   GroupPolicy:
@@ -98,6 +102,7 @@ class TweekModule {
   [WindowsVersion[]] $VersionList = @()
   [TweakClass] $Class = [TweakClass]::stable
   [TweakCatagory] $Catagory = [TweakCatagory]::telemetry
+  [boolean] $SystemBreaking = $false
   [TweekRegistryInterface] $Registry = [TweekRegistryInterface]::New()
   [TweekGroupPolicyInterface] $GroupPolicy = [TweekGroupPolicyInterface]::New()
   [TweekServiceInterface] $Service = [TweekServiceInterface]::New()
@@ -107,13 +112,14 @@ class TweekModule {
   hidden [switch] $_DryRun
   hidden [switch] $_Testing
   hidden [switch] $_Manual
+  hidden [switch] $_IReallyWantToDoThis
   hidden [string] $_Class
   hidden [string] $_Catagory
   hidden [string] $_Tweak
   hidden [array] $_WindowsVersion
   hidden $_VerbosePreference
 
-  [void] Configure([switch]$DryRun, [switch]$Testing, [switch]$Manual, [string]$Class, [string]$Catagory, [string]$Tweak, [array]$WindowsVersion, $VerbosePreference) {
+  [void] Configure([switch]$DryRun, [switch]$Testing, [switch]$Manual, [switch]$IReallyWantToDoThis, [string]$Class, [string]$Catagory, [string]$Tweak, [array]$WindowsVersion, $VerbosePreference) {
     # Configures tweek with options declared on the command line.
     #
     # As modules are dynamically loaded and instantiated, we need to manually
@@ -124,6 +130,9 @@ class TweekModule {
     #   DryRun: Switch if DryRun option was selected on the command line.
     #   Testing: Switch if Test hashes are being used. Disable execution.
     #   Manual: Switch if manual tweek commands should be displayed as well.
+    #   IReallyWantToDoThis:
+    #       Switch if user actively acknowledged a potentially system breaking
+    #       change.
     #   Classifcation: String Class specified on the command line.
     #   Catagory: String catagory specified on the command line.
     #   Tweak: String specific tweak to run on the command line.
@@ -135,6 +144,7 @@ class TweekModule {
     $this._DryRun = $DryRun
     $this._Testing = $Testing
     $this._Manual = $Manual
+    $this._IReallyWantToDoThis = $IReallyWantToDoThis
     $this._Class = $Class
     $this._Catagory = $Catagory
     $this._Tweak = $Tweak
@@ -174,6 +184,13 @@ class TweekModule {
     # If you need to change how a tweak is applied, modify _ApplyTweak()
     # in your subclass.
     #
+    # SystemBreaking tweeks require -IReallyWantToDoThis to run.
+    #
+    if ($this.SystemBreaking -And !$this._IReallyWantToDoThis) {
+      Write-Error ($this.Name() + ' contains potentially **SYSTEM BREAKING** changes, and requires a manual acknowledgement before executing (-IReallyWantToDoThis). See modules -List for more information.')
+      return
+    }
+
     if (($this._Tweak) -And ($this._Tweak -eq $this.Name())) {
       $this.ExecuteOrDryRun()
     } else {
@@ -255,7 +272,7 @@ class TweekModule {
         $this.ManualDescription)
     }
     return (
-      "`n{0}`n{1}: {2}`nDetailed Description:`n {3}`nReferences:`n {4}`nIncompatible Editions:`n {5}`nIncompatible Version:`n {6}`nClass: {7}`nCatagory: {8}`nValid Module: {9}`nApplies To Your System?: {10}" -f
+      "`n{0}`n{1}: {2}`nDetailed Description:`n {3}`nReferences:`n {4}`nIncompatible Editions:`n {5}`nIncompatible Version:`n {6}`nClass: {7}`nCatagory: {8}`nRequires Manual Setup?: {9}`nValid Module: {10}`nApplies To Your System?: {11}" -f
       ('-' * 35),
       $this.Name(),
       $this.Description,
@@ -265,6 +282,7 @@ class TweekModule {
       ($this.VersionList -join "`n "),
       $this.Class,
       $this.Catagory,
+      $this.SystemBreaking,
       $this.Validate(),
       $this.VerifyNonBlacklist())
   }

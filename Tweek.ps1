@@ -94,6 +94,13 @@
     You should never use this in NORMAL usage. If you are developing a new
     Tweak that is unrelated to an Interface, you probably want -Unsigned.
 
+.PARAMETER IReallyWantToDoThis
+    Acknowledge that a tweek has warned you a manaual step needed to be done
+    before it will execute the tweek. This will enable the tweek to apply to
+    your system. Tweeks requiring this flag can **DAMAGE YOUR SYSTEM** if you
+    don't do the required manual steps before enabling the tweek. Don't take
+    this lightly.
+
 .EXAMPLE
     C:\PS> .\Tweek.ps1 -DryRun -Catagory telemetry -Class unstable
 
@@ -166,7 +173,8 @@ param(
   [switch]$NoGroupPolicy,
   [switch]$InstallGroupPolicy,
   [switch]$Testing,
-  [switch]$Manual
+  [switch]$Manual,
+  [switch]$IReallyWantToDoThis
 )
 
 if ($InstallGroupPolicy) {
@@ -235,7 +243,7 @@ try {
 
   Write-Verbose ('Configuring modules ...')
   foreach ($Module in $Modules.GetEnumerator()) {
-    $Module.Value.Configure($DryRun, $Testing, $Manual, $Class, $Catagory, $Tweak, $WindowsVersion, $VerbosePreference)
+    $Module.Value.Configure($DryRun, $Testing, $Manual, $IReallyWantToDoThis, $Class, $Catagory, $Tweak, $WindowsVersion, $VerbosePreference)
   }
 
   if ($List) {
