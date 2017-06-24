@@ -18,8 +18,9 @@ class OneDrive : TweekModule {
     "Windows Components > OneDrive`n" +
     "   *  Policy: Prevent the usage of OneDrive for file storage = " +
     "Enabled`n" +
-    "*  start > Task Scheduler > Task Scheduler Library`n" +
-    "   *  Key: OneDrive Standalone Update Task v2 = Disabled`n"
+    "*  start > Task Scheduler`n" +
+    "   *  Task Scheduler Library`n" +
+    "      *  Key: OneDrive Standalone Update Task v2 = Disabled`n"
   )
   [string] $Author = 'github.com/r-pufky/tweek'
   [TweakClass] $Class = [TweakClass]::stable
