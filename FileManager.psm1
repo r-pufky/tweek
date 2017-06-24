@@ -180,6 +180,7 @@ class FileManager {
       Import-Module $File.FullName -Force
       $ClassName = ((Get-Module $File.BaseName).ImplementingAssembly.DefinedTypes | where IsPublic).Name
       $ModuleObject = invoke-command -scriptblock (get-command 'Load' -CommandType Function -Module $ClassName).ScriptBlock
+      Write-Verbose ($ModuleObject.Name() + ' loaded; indexing ...')
       $Modules.Add($ModuleObject.Name(), $ModuleObject)
     }
     return $Modules
