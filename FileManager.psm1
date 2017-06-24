@@ -173,6 +173,8 @@ class FileManager {
     #   Hashtable containing loaded TweekModule class objects
     #   {[string] ClassName: [TweakModule] tweek object}
     #
+    $VerbosePreference = $this._VerbosePreference
+    Write-Verbose ('Loading Modules ...')
     $Modules = @{}
     foreach ($File in Get-ChildItem $ModulePath -Filter '*.psm1') {
       Import-Module $File.FullName -Force
