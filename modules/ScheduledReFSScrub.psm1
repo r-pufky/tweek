@@ -27,7 +27,7 @@ class ScheduledReFSScrub : TweekModule {
   [TweakClass] $Class = [TweakClass]::optional
   [TweakCatagory] $Catagory = [TweakCatagory]::filesystem
 
-  hidden [void] ServiceTweek() {
+  hidden [void] ScheduledTaskTweek() {
     $this.ScheduledTask.Disable('Data Integrity Scan')
     $this.ScheduledTask.Disable('Data Integrity Scan for Crash Recovery')
   }
